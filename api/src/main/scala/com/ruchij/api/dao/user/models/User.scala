@@ -1,4 +1,4 @@
-package com.ruchij.api.services.user.models
+package com.ruchij.api.dao.user.models
 
 import com.ruchij.api.dao.user.models.Emails.Email
 import org.joda.time.DateTime

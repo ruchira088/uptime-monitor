@@ -8,6 +8,6 @@ object Passwords {
   }
 
   extension (password: Password) {
-    def toString: String = List.fill(password.length)("*").mkString
+    def print: String = "***************"
   }
 }

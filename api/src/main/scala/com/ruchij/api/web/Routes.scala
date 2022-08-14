@@ -2,6 +2,7 @@ package com.ruchij.api.web
 
 import cats.effect.Sync
 import com.ruchij.api.services.health.HealthService
+import com.ruchij.api.services.user.UserService
 import com.ruchij.api.web.middleware.{ExceptionHandler, NotFoundHandler}
 import com.ruchij.api.web.routes.HealthRoutes
 import org.http4s.dsl.Http4sDsl

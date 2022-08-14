@@ -8,8 +8,4 @@ object Emails {
   object Email {
     def apply(email: String): Either[ValidationException, Email] = Right(email)
   }
-
-  extension (email: Email) {
-    def toString: String = email
-  }
 }
