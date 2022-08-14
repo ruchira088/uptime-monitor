@@ -3,4 +3,3 @@
     name:
       - boto3
       - botocore
-      - pygithub
