@@ -28,6 +28,8 @@ object Dependencies
 
   lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.1.3"
 
+  lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.3.14"
+
   lazy val jodaTime = "joda-time" % "joda-time" % "2.11.0"
 
   lazy val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.1"

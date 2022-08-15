@@ -70,7 +70,8 @@ lazy val migrationApp =
     .enablePlugins(JavaAppPackaging)
     .settings(
       name := "uptime-monitor-migration-app",
-      topLevelDirectory := None
+      topLevelDirectory := None,
+      libraryDependencies ++= Seq(catsEffect, pureconfig, flywayCore)
     )
 
 val verifyReleaseBranch = { state: State =>
