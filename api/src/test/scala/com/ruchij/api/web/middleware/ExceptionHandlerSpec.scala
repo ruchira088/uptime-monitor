@@ -2,8 +2,8 @@ package com.ruchij.api.web.middleware
 
 import cats.effect.IO
 import com.ruchij.api.exceptions.ResourceNotFoundException
-import com.ruchij.test.matchers.*
-import com.ruchij.test.utils.IOUtils.runIO
+import com.ruchij.api.test.matchers.*
+import com.ruchij.api.test.utils.IOUtils.runIO
 import io.circe.literal.json
 import org.http4s.{HttpApp, Request, Response, Status}
 import org.scalatest.flatspec.AnyFlatSpec

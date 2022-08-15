@@ -1,4 +1,4 @@
-package com.ruchij.test.utils
+package com.ruchij.api.test.utils
 
 import cats.effect.Sync
 import cats.implicits._

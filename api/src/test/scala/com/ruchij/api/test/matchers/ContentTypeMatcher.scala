@@ -1,4 +1,4 @@
-package com.ruchij.test.matchers
+package com.ruchij.api.test.matchers
 
 import cats.Show
 import org.http4s.headers.`Content-Type`

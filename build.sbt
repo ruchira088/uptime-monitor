@@ -42,7 +42,7 @@ lazy val api =
         logbackClassic,
         scalaLogging
       ),
-      libraryDependencies ++= Seq(scalaTest, pegdown).map(_ % Test)
+      libraryDependencies ++= Seq(scalaTest, scalaTestPlusMockito, pegdown).map(_ % Test)
     )
 
 lazy val batch =
