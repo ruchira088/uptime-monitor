@@ -18,6 +18,16 @@ object Dependencies
 
   lazy val circeLiteral = "io.circe" %% "circe-literal" % CirceVersion
 
+  lazy val doobie = "org.tpolecat" %% "doobie-core" % "1.0.0-RC2"
+
+  lazy val doobieHikari = "org.tpolecat" %% "doobie-hikari" % "1.0.0-RC2"
+
+  lazy val postgresql = "org.postgresql" % "postgresql" % "42.4.1"
+
+  lazy val h2 = "com.h2database" % "h2" % "2.1.214"
+
+  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.1.3"
+
   lazy val jodaTime = "joda-time" % "joda-time" % "2.11.0"
 
   lazy val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.1"

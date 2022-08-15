@@ -37,6 +37,10 @@ lazy val api =
         circeGeneric,
         circeParser,
         circeLiteral,
+        doobie,
+        doobieHikari,
+        postgresql,
+        h2,
         jodaTime,
         pureconfig,
         logbackClassic,
@@ -59,6 +63,14 @@ lazy val worker =
     .settings(
       name := "uptime-monitor-worker",
       topLevelDirectory := None,
+    )
+
+lazy val migrationApp =
+  (project in file("./migration-app"))
+    .enablePlugins(JavaAppPackaging)
+    .settings(
+      name := "uptime-monitor-migration-app",
+      topLevelDirectory := None
     )
 
 val verifyReleaseBranch = { state: State =>
