@@ -7,7 +7,7 @@ import com.ruchij.api.web.Routes
 import org.http4s.ember.server.EmberServerBuilder
 import pureconfig.ConfigSource
 
-object App extends IOApp {
+object ApiApp extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
       configObjectSource <- IO.delay(ConfigSource.defaultApplication)
