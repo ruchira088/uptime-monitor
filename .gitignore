@@ -2,6 +2,7 @@
 .bsp
 .metals
 .vscode
+.bloop
 
 target
 
