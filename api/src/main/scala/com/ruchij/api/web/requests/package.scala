@@ -7,13 +7,10 @@ import org.http4s.{EntityDecoder, Request}
 
 package object requests {
 
-  implicit class RequestOps[F[_]](request: Request[F]) {
+  extension [F[_]] (request: Request[F]) {
     def to[A](
-      using validator: Validator[F, A],
-      entityDecoder: EntityDecoder[F, A],
-      monadThrow: MonadThrow[F]
+      using validator: Validator[F, A], entityDecoder: EntityDecoder[F, A], monadThrow: MonadThrow[F]
     ): F[A] =
       request.as[A].flatMap(validator.validate)
   }
-
 }

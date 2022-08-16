@@ -2,7 +2,7 @@ package com.ruchij.api.web.routes
 
 import cats.effect.Async
 import cats.implicits.*
-import com.ruchij.api.web.requests.CreateUserRequest
+import com.ruchij.api.web.requests.{CreateUserRequest, to}
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe.CirceEntityCodec.*
@@ -18,7 +18,7 @@ object UserRoutes {
     HttpRoutes.of[F] {
       case request @ POST -> Root =>
         for {
-          createUserRequest <- request.as[CreateUserRequest]
+          createUserRequest <- request.to[CreateUserRequest]
           user <- userService.create(createUserRequest.email, createUserRequest.password, createUserRequest.firstName, createUserRequest.lastName)
           response <- Created(user)
         }
