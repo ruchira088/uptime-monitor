@@ -30,6 +30,12 @@ object Dependencies
 
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.3.14"
 
+  lazy val redis4CatsEffects = "dev.profunktor" %% "redis4cats-effects" % "1.2.0"
+
+  lazy val jbcrypt = "org.mindrot" % "jbcrypt" % "0.4"
+
+  lazy val embeddedRedis = "com.github.kstyrc" % "embedded-redis" % "0.6"
+
   lazy val jodaTime = "joda-time" % "joda-time" % "2.11.0"
 
   lazy val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.1"

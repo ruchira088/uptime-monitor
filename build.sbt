@@ -41,6 +41,8 @@ lazy val api =
         doobieHikari,
         postgresql,
         h2,
+        redis4CatsEffects,
+        jbcrypt,
         jodaTime,
         pureconfig,
         logbackClassic,
@@ -54,7 +56,7 @@ lazy val batch =
     .enablePlugins(JavaAppPackaging)
     .settings(
       name := "uptime-monitor-batch",
-      topLevelDirectory := None,
+      topLevelDirectory := None
     )
 
 lazy val worker =
@@ -62,7 +64,7 @@ lazy val worker =
     .enablePlugins(JavaAppPackaging)
     .settings(
       name := "uptime-monitor-worker",
-      topLevelDirectory := None,
+      topLevelDirectory := None
     )
 
 lazy val migrationApp =
@@ -71,7 +73,7 @@ lazy val migrationApp =
     .settings(
       name := "uptime-monitor-migration-app",
       topLevelDirectory := None,
-      libraryDependencies ++= Seq(catsEffect, pureconfig, flywayCore)
+      libraryDependencies ++= Seq(catsEffect, pureconfig, flywayCore, logbackClassic, scalaLogging)
     )
 
 val verifyReleaseBranch = { state: State =>

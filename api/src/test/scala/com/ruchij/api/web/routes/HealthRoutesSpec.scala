@@ -10,7 +10,6 @@ import org.http4s.Method.GET
 import org.http4s.syntax.all.uri
 import org.http4s.{Request, Status}
 import org.joda.time.{DateTime, DateTimeZone}
-import org.mockito.Mockito
 import org.mockito.Mockito.when
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
@@ -24,9 +23,9 @@ class HealthRoutesSpec extends AnyFlatSpec with Matchers with MockedRoutesIO {
         "serviceName": "uptime-monitor",
         "serviceVersion": "1.0.0",
         "organization": "com.ruchij",
-        "scalaVersion": "2.13.6",
-        "sbtVersion": "1.5.5",
-        "javaVersion": "11.0.12",
+        "scalaVersion": "3.1.3",
+        "sbtVersion": "1.7.1",
+        "javaVersion": "17.0.4",
         "gitBranch" : "my-branch",
         "gitCommit" : "my-commit",
         "buildTimestamp" : null,
@@ -42,9 +41,9 @@ class HealthRoutesSpec extends AnyFlatSpec with Matchers with MockedRoutesIO {
                 "uptime-monitor",
                 "1.0.0",
                 "com.ruchij",
-                "2.13.6",
-                "1.5.5",
-                "11.0.12",
+                "3.1.3",
+                "1.7.1",
+                "17.0.4",
                 Some("my-branch"),
                 Some("my-commit"),
                 None,
