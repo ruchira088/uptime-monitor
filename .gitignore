@@ -4,6 +4,7 @@
 .vscode
 .bloop
 
+project/project
 target
 
 .DS_Store
