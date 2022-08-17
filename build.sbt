@@ -50,6 +50,7 @@ lazy val api =
       ),
       libraryDependencies ++= Seq(scalaTest, scalaTestPlusMockito, pegdown).map(_ % Test)
     )
+    .dependsOn(migrationApp)
 
 lazy val batch =
   (project in file("./batch"))

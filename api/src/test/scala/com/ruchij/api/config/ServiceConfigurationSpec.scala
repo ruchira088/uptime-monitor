@@ -7,6 +7,8 @@ import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 import pureconfig.ConfigSource
+import com.ruchij.migration.config.DatabaseConfiguration.apply
+import com.ruchij.migration.config.DatabaseConfiguration
 
 class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
 
@@ -14,6 +16,17 @@ class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
     val configObjectSource =
       ConfigSource.string {
         s"""
+          database-configuration {
+            url = "jdbc:h2:mem:uptime-monitor;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false"
+            url = $${?DATABASE_URL}
+
+            user = ""
+            user = $${?DATABASE_USER}
+
+            password = ""
+            password = $${?DATABASE_PASSWORD}
+          }
+
           http-configuration {
             host = "127.0.0.1"
             host = $${?HTTP_HOST}
@@ -37,7 +50,9 @@ class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
         IO.delay {
           serviceConfiguration.httpConfiguration mustBe HttpConfiguration(ipv4"127.0.0.1", port"80")
           serviceConfiguration.buildInformation mustBe
-            BuildInformation(Some("my-branch"), None, Some(new DateTime(2021, 7, 31, 10, 10, 0, 0, DateTimeZone.UTC)))
+            BuildInformation(Some("my-branch"), None, Some(DateTime(2021, 7, 31, 10, 10, 0, 0, DateTimeZone.UTC)))
+          serviceConfiguration.databaseConfiguration mustBe
+            DatabaseConfiguration("jdbc:h2:mem:uptime-monitor;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false", "", "")
         }
     }
   }
@@ -46,6 +61,12 @@ class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
     val configObjectSource =
       ConfigSource.string {
         s"""
+          database-configuration {
+            url = "jdbc:h2:mem:uptime-monitor;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false"
+            user = ""
+            password = ""
+          }
+
           http-configuration {
             host = "0.0.0.0"
 

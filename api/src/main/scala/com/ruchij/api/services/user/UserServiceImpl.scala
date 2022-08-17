@@ -18,7 +18,7 @@ import com.ruchij.api.dao.credentials.models.Credentials
 import cats.Monad
 import com.ruchij.api.types.IdGenerator
 
-class UserServiceImpl[F[_]: Sync: JodaClock: [K[_]] =>> IdGenerator[K, User], G[_]: Monad](passwordHashingService: PasswordHashingService[F], userDao: UserDao[G], credentialsDao: CredentialsDao[G])(using transaction: G ~> F) extends UserService[F] {
+class UserServiceImpl[F[_]: Sync: JodaClock: [F[_]] =>> IdGenerator[F, User], G[_]: Monad](passwordHashingService: PasswordHashingService[F], userDao: UserDao[G], credentialsDao: CredentialsDao[G])(using transaction: G ~> F) extends UserService[F] {
 
   override def create(email: Email, password: Password, firstName: String, lastName: String): F[User] =
     for {
