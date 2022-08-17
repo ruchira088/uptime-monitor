@@ -50,7 +50,7 @@ lazy val api =
       ),
       libraryDependencies ++= Seq(scalaTest, scalaTestPlusMockito, pegdown).map(_ % Test)
     )
-    .dependsOn(migrationApp)
+    .dependsOn(migration)
 
 lazy val batch =
   (project in file("./batch"))
@@ -68,11 +68,11 @@ lazy val worker =
       topLevelDirectory := None
     )
 
-lazy val migrationApp =
-  (project in file("./migration-app"))
+lazy val migration =
+  (project in file("./migration"))
     .enablePlugins(JavaAppPackaging)
     .settings(
-      name := "uptime-monitor-migration-app",
+      name := "uptime-monitor-migration",
       topLevelDirectory := None,
       libraryDependencies ++= Seq(catsEffect, pureconfig, flywayCore, logbackClassic, scalaLogging)
     )
@@ -82,7 +82,7 @@ lazy val appStack =
     .settings(
       name := "application-stack"
     )
-    .dependsOn(migrationApp, api)
+    .dependsOn(migration, api)
 
 val verifyReleaseBranch = { state: State =>
   val git = Git.mkVcs(state.extract.get(baseDirectory))

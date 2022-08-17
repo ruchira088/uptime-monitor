@@ -3,7 +3,15 @@
   connection: local
 
   tasks:
-    - name: Build Docker image
+    - name: Build migration Docker image
       import_tasks: tasks/build-and-publish-docker-image.yml
       vars:
         publish: false
+        app_name: migration
+        
+    - name: Build API Docker image
+      import_tasks: tasks/build-and-publish-docker-image.yml
+      vars:
+        publish: false
+        app_name: api
+        ports: 8080
