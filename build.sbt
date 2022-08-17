@@ -74,7 +74,7 @@ lazy val migration =
     .settings(
       name := "uptime-monitor-migration",
       topLevelDirectory := None,
-      libraryDependencies ++= Seq(catsEffect, pureconfig, flywayCore, logbackClassic, scalaLogging)
+      libraryDependencies ++= Seq(catsEffect, pureconfig, flywayCore, postgresql, h2, logbackClassic, scalaLogging)
     )
 
 lazy val appStack =

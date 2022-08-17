@@ -13,7 +13,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      migration-app:
+      migration:
         condition: service_completed_successfully
     ports:
       - 8080:8080
@@ -25,12 +25,13 @@ services:
       - ./src/main/resources/logback.xml:/opt/data/logback.xml
       - ./docker-compose/scripts:/opt/scripts
 
-  migration-app:
-    image: ghcr.io/ruchira088/uptime-monitor-migration-app:main
+  migration:
+    image: ghcr.io/ruchira088/uptime-monitor-migration:main
     depends_on:
       postgres:
         condition: service_healthy
     environment:
+      APPLICATION: "api"
       DATABASE_URL: "jdbc:postgresql://postgres:5432/uptime-monitor"
       DATABASE_USER: "admin"
       DATABASE_PASSWORD: "password"
@@ -39,10 +40,10 @@ services:
     image: postgres
     healthcheck:
       test: "pg_isready -U admin -d uptime-monitor"
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 10
-      start_period: 10s
+      start_period: 5s
     ports:
       - 5432:5432
     environment:
