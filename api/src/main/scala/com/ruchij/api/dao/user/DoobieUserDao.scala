@@ -30,4 +30,5 @@ object DoobieUserDao extends UserDao[ConnectionIO] {
 
   override def findById(userId: String): ConnectionIO[Option[User]] =
     (SelectQuery ++ fr"WHERE id = $userId").query[User].option
+
 }

@@ -1,15 +1,14 @@
 package com.ruchij.api.web
 
+import cats.effect.kernel.Async
 import com.ruchij.api.services.health.HealthService
 import com.ruchij.api.services.user.UserService
 import com.ruchij.api.web.middleware.{ExceptionHandler, NotFoundHandler}
-import com.ruchij.api.web.routes.HealthRoutes
+import com.ruchij.api.web.routes.{HealthRoutes, UserRoutes}
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.Router
 import org.http4s.server.middleware.GZip
 import org.http4s.{HttpApp, HttpRoutes}
-import com.ruchij.api.web.routes.UserRoutes
-import cats.effect.kernel.Async
 
 object Routes {
   def apply[F[_]: Async](userService: UserService[F], healthService: HealthService[F]): HttpApp[F] = {

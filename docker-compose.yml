@@ -3,24 +3,49 @@ version: "3.8"
 services:
 
   uptime-monitor:
-#    build: .
-    image: ghcr.io/ruchira088/uptime-monitor:main
+    image: ghcr.io/ruchira088/uptime-monitor-api:main
     healthcheck:
       test: "/opt/scripts/wait-for-it.sh localhost:8080"
       start_period: 5s
       interval: 10s
+      retries: 10
       timeout: 5s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration-app:
+        condition: service_completed_successfully
     ports:
       - 8080:8080
-#      - 5005:5005
+    environment:
+      DATABASE_URL: "jdbc:postgresql://postgres:5432/uptime-monitor"
+      DATABASE_USER: "admin"
+      DATABASE_PASSWORD: "password"
     volumes:
       - ./src/main/resources/logback.xml:/opt/data/logback.xml
       - ./docker-compose/scripts:/opt/scripts
-#      - ~/.sbt:/root/.sbt
-#      - ~/Library/Caches/Coursier:/root/.cache/coursier # MacOS Coursier cache
-#      #      - ~/.cache/coursier:/root/.cache/coursier # Linux Coursier cache
-#      #      - ~/AppData/Local/Coursier/Cache:/root/.cache/coursier # Windows Coursier cache
-#      - .:/opt/uptime-monitor
-#      - /opt/uptime-monitor/target
-#      - /opt/uptime-monitor/project/target
-#      - /root/.sbt/1.0/plugins
+
+  migration-app:
+    image: ghcr.io/ruchira088/uptime-monitor-migration-app:main
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "jdbc:postgresql://postgres:5432/uptime-monitor"
+      DATABASE_USER: "admin"
+      DATABASE_PASSWORD: "password"
+  
+  postgres:
+    image: postgres
+    healthcheck:
+      test: "pg_isready -U admin -d uptime-monitor"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: "uptime-monitor"
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "password"
