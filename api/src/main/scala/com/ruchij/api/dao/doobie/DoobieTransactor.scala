@@ -1,12 +1,13 @@
 package com.ruchij.api.dao.doobie
 
+import cats.effect.kernel.Async
 import cats.effect.kernel.Resource
 import cats.implicits.*
+import com.ruchij.api.types.FunctionKTypes.{_, given}
 import com.ruchij.migration.config.DatabaseConfiguration
-import com.ruchij.api.types.FunctionKTypes.{given, *}
 import doobie.hikari.HikariTransactor
-import cats.effect.kernel.Async
 import doobie.util.ExecutionContexts
+
 import scala.concurrent.ExecutionContext
 
 object DoobieTransactor {

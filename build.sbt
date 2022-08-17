@@ -77,6 +77,13 @@ lazy val migrationApp =
       libraryDependencies ++= Seq(catsEffect, pureconfig, flywayCore, logbackClassic, scalaLogging)
     )
 
+lazy val appStack =
+  (project in file("./app-stack"))
+    .settings(
+      name := "application-stack"
+    )
+    .dependsOn(migrationApp, api)
+
 val verifyReleaseBranch = { state: State =>
   val git = Git.mkVcs(state.extract.get(baseDirectory))
   val branch = git.currentBranch

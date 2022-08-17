@@ -3,14 +3,14 @@ package com.ruchij.api.dao.doobie
 import com.ruchij.api.dao.credentials.models.HashedPasswords.HashedPassword
 import com.ruchij.api.dao.models.IDs.ID
 import com.ruchij.api.dao.user.models.Emails.Email
+import doobie.enumerated.JdbcType.Date
 import doobie.implicits.javasql.*
-import doobie.util.Put
 import doobie.util.Get
+import doobie.util.Put
 import org.joda.time.DateTime
+import org.tpolecat.typename.TypeName
 
 import java.sql.Timestamp
-import doobie.enumerated.JdbcType.Date
-import org.tpolecat.typename.TypeName
 
 object DoobieCodecs {
     given Put[Email] = Put[String].tcontramap[Email](_.toString)
