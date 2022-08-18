@@ -1,27 +1,34 @@
 package com.ruchij.api
 
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.arrow.FunctionK
+import cats.effect.ExitCode
+import cats.effect.IO
+import cats.effect.IOApp
+import cats.effect.kernel.Async
+import cats.effect.kernel.Resource
+import cats.effect.kernel.Resource.apply
 import cats.implicits.*
+import cats.~>
 import com.ruchij.api.config.ServiceConfiguration
+import com.ruchij.api.dao.credentials.DoobieCredentialsDao
+import com.ruchij.api.dao.doobie.DoobieTransactor
+import com.ruchij.api.dao.user.DoobieUserDao
+import com.ruchij.api.services.hash.BCryptPasswordHashingService
+import com.ruchij.api.services.hash.PasswordHashingService
+import com.ruchij.api.services.health.HealthService
 import com.ruchij.api.services.health.HealthServiceImpl
+import com.ruchij.api.services.user.UserService
+import com.ruchij.api.services.user.UserServiceImpl
+import com.ruchij.api.types.JodaClock
 import com.ruchij.api.web.Routes
+import doobie.ConnectionIO
+import doobie.hikari.HikariTransactor
+import doobie.util.transactor
+import org.http4s.HttpApp
+import org.http4s.client.Client
+import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.EmberServerBuilder
 import pureconfig.ConfigSource
-import com.ruchij.api.dao.doobie.DoobieTransactor
-import cats.effect.kernel.Async
-import doobie.util.transactor
-import doobie.ConnectionIO
-import com.ruchij.api.services.health.HealthService
-import com.ruchij.api.services.user.UserService
-import com.ruchij.api.services.hash.PasswordHashingService
-import com.ruchij.api.services.hash.BCryptPasswordHashingService
-import com.ruchij.api.services.user.UserServiceImpl
-import com.ruchij.api.dao.user.DoobieUserDao
-import com.ruchij.api.dao.credentials.DoobieCredentialsDao
-import com.ruchij.api.types.JodaClock
-import cats.effect.kernel.Resource.apply
-import cats.effect.kernel.Resource
-import org.http4s.HttpApp
 
 object ApiApp extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
@@ -29,28 +36,41 @@ object ApiApp extends IOApp {
       configObjectSource <- IO.delay(ConfigSource.defaultApplication)
       serviceConfiguration <- ServiceConfiguration.parse[IO](configObjectSource)
 
-      exitCode <- EmberServerBuilder
-        .default[IO]
-        .withHost(serviceConfiguration.httpConfiguration.host)
-        .withPort(serviceConfiguration.httpConfiguration.port)
-        .build
-        .use(_ => IO.never)
-        .as(ExitCode.Success)
+      exitCode <-
+        httpApp[IO](serviceConfiguration)
+          .flatMap { app =>
+            EmberServerBuilder
+              .default[IO]
+              .withHttpApp(app)
+              .withHost(serviceConfiguration.httpConfiguration.host)
+              .withPort(serviceConfiguration.httpConfiguration.port)
+              .build
+          }
+          .use(_ => IO.never)
+          .as(ExitCode.Success)
     } yield exitCode
 
-  def application[F[_]: Async: JodaClock](serviceConfiguration: ServiceConfiguration): Resource[F, HttpApp[F]] =
-    DoobieTransactor.create(serviceConfiguration.databaseConfiguration)
-      .map(_.trans)
-      .map {
-        implicit transactor => 
-          val healthService: HealthService[F] = 
-            HealthServiceImpl[F](serviceConfiguration.buildInformation)
+  def httpApp[F[_]: Async: JodaClock](serviceConfiguration: ServiceConfiguration): Resource[F, HttpApp[F]] =
+    for {
+      hikariTransactor <- DoobieTransactor.create(serviceConfiguration.databaseConfiguration)
+      client <- EmberClientBuilder.default[F].build
+    } yield httpApp(hikariTransactor, client, serviceConfiguration)
 
-          val passwordHashingService: PasswordHashingService[F] = BCryptPasswordHashingService[F]
+  def httpApp[F[_]: Async: JodaClock](
+    hikariTransactor: HikariTransactor[F],
+    client: Client[F],
+    serviceConfiguration: ServiceConfiguration
+  ): HttpApp[F] = {
+    given FunctionK[ConnectionIO, F] = hikariTransactor.trans
 
-          val userService: UserService[F] =
-            UserServiceImpl[F, ConnectionIO](passwordHashingService, DoobieUserDao, DoobieCredentialsDao)
+    val healthService: HealthService[F] =
+      HealthServiceImpl[F](client, serviceConfiguration.buildInformation)
 
-          Routes(userService, healthService)
-      }
+    val passwordHashingService: PasswordHashingService[F] = BCryptPasswordHashingService[F]
+
+    val userService: UserService[F] =
+      UserServiceImpl[F, ConnectionIO](passwordHashingService, DoobieUserDao, DoobieCredentialsDao)
+
+    Routes(userService, healthService)
+  }
 }

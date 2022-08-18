@@ -33,6 +33,7 @@ lazy val api =
       libraryDependencies ++= Seq(
         http4sDsl,
         http4sEmberServer,
+        http4sEmberClient,
         http4sCirce,
         circeGeneric,
         circeParser,

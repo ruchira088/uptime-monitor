@@ -35,7 +35,7 @@ object AppStack extends IOApp {
 
   private def api[F[_]: Async: JodaClock]: Resource[F, Server] =
     ApiApp
-      .application[F](ServiceConfiguration(DatabaseConfig, HttpConfig, BuildInfo))
+      .httpApp[F](ServiceConfiguration(DatabaseConfig, HttpConfig, BuildInfo))
       .flatMap { httpApp =>
         EmberServerBuilder
           .default[F]

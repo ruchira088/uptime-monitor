@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  connection: local
+
+  tasks:
+    - name: Install dependencies
+      import_tasks: tasks/install-dependencies.yml
+
+    - name: Build and publish migration Docker image
+      import_tasks: tasks/build-and-publish-docker-image.yml
+      vars:
+        publish: true
+        app_name: migration
+        
+    - name: Build and publish API Docker image
+      import_tasks: tasks/build-and-publish-docker-image.yml
+      vars:
+        publish: true
+        app_name: api
+        ports: 8080
