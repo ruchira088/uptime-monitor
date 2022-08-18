@@ -49,6 +49,7 @@ object MigrationApp extends IOApp {
               databaseConfiguration.password
             )
             .locations(Seq(application.flywayScripts): _*)
+            .outOfOrder(true)
             .load()
         }
 
