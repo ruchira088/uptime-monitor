@@ -96,7 +96,7 @@ jobs:
             ${{ runner.os }}-${{ hashFiles('**/build.properties') }}
             ${{ runner.os }}
 
-      - name: Build and publish Docker image
+      - name: Build and publish Docker images
         run: ansible-playbook playbooks/build-and-publish-docker-images.yml
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
