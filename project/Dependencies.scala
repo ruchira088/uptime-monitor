@@ -10,6 +10,8 @@ object Dependencies
 
   lazy val http4sEmberServer = "org.http4s" %% "http4s-ember-server" % Http4sVersion
 
+  lazy val http4sEmberClient = "org.http4s" %% "http4s-ember-client" % Http4sVersion
+
   lazy val http4sCirce = "org.http4s" %% "http4s-circe" % Http4sVersion
 
   lazy val circeGeneric = "io.circe" %% "circe-generic" % CirceVersion
@@ -22,11 +24,11 @@ object Dependencies
 
   lazy val doobieHikari = "org.tpolecat" %% "doobie-hikari" % "1.0.0-RC2"
 
-  lazy val postgresql = "org.postgresql" % "postgresql" % "42.4.1"
+  lazy val postgresql = "org.postgresql" % "postgresql" % "42.4.2"
 
   lazy val h2 = "com.h2database" % "h2" % "2.1.214"
 
-  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.1.3"
+  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.1.5"
 
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.3.14"
 
