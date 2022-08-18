@@ -16,7 +16,7 @@ trait MockedRoutes[F[_]] extends MockitoSugar with OneInstancePerTest {  self: S
 
   val async: Async[F]
 
-  def createRoutes(): HttpApp[F] =
+  def createRoutes: HttpApp[F] =
     Routes[F](userService, healthService)(async)
 
 }
