@@ -1,22 +1,37 @@
 version: "3.8"
 
 services:
+  load-balancer:
+    image: nginx:stable-alpine
+    healthcheck:
+      test: "/opt/scripts/wait-for -t 3 localhost:443"
+      start_period: 5s
+      interval: 5s
+      retries: 5
+      timeout: 3s
+    depends_on:
+      uptime-monitor-api:
+        condition: service_healthy
+    ports:
+      - 443:443
+    volumes:
+      - "./docker-compose/scripts:/opt/scripts"
+      - "./nginx/ssl:/etc/ssl"
+      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
 
-  uptime-monitor:
+  uptime-monitor-api:
     image: ghcr.io/ruchira088/uptime-monitor-api:main
     healthcheck:
       test: "/opt/scripts/wait-for-it.sh localhost:8080"
       start_period: 5s
-      interval: 10s
-      retries: 10
-      timeout: 5s
+      interval: 5s
+      retries: 5
+      timeout: 3s
     depends_on:
       postgres:
         condition: service_healthy
       migration:
         condition: service_completed_successfully
-    ports:
-      - 8080:8080
     environment:
       DATABASE_URL: "jdbc:postgresql://postgres:5432/uptime-monitor"
       DATABASE_USER: "admin"
@@ -40,10 +55,10 @@ services:
     image: postgres
     healthcheck:
       test: "pg_isready -U admin -d uptime-monitor"
-      interval: 5s
-      timeout: 3s
-      retries: 10
       start_period: 5s
+      interval: 5s
+      retries: 5
+      timeout: 3s
     ports:
       - 5432:5432
     environment:
