@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: uptime-monitor-deployment
+  name: api-deployment
   namespace: {{ namespace }}
 spec:
   selector:
     matchLabels:
-      app: uptime-monitor
+      app: api
       branch: {{ git_branch }}
   replicas: 1
   template:
     metadata:
       labels:
-        app: uptime-monitor
+        app: api
         branch: {{ git_branch }}
     spec:
       containers:
-        - name: uptime-monitor-container
-          image: ghcr.io/ruchira088/uptime-monitor:{{ git_branch }}-{{ git_commit }}
+        - name: api-container
+          image: ghcr.io/ruchira088/uptime-monitor-api:{{ git_branch }}-{{ git_commit }}
           envFrom:
             - configMapRef:
-                name: uptime-monitor-data-config-map
+                name: api-data-config-map
             - secretRef:
-                name: uptime-monitor-secrets
+                name: api-secrets
           readinessProbe:
             httpGet:
               port: http4s-port
@@ -55,7 +55,7 @@ spec:
       volumes:
         - name: file-config-map
           configMap:
-            name: uptime-monitor-file-config-map
+            name: api-file-config-map
       imagePullSecrets:
         - name: docker-registry-credentials
 
