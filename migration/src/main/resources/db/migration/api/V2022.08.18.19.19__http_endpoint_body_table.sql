@@ -2,6 +2,7 @@ CREATE TABLE http_endpoint_body (
     id VARCHAR(48),
     created_at TIMESTAMP NOT NULL,
     http_endpoint_id VARCHAR(48) UNIQUE NOT NULL,
+    content_type VARCHAR(63) NOT NULL,
     body VARCHAR(2047) NOT NULL,
 
     PRIMARY KEY (id),
