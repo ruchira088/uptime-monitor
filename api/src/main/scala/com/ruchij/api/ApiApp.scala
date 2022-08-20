@@ -15,8 +15,8 @@ import com.ruchij.api.dao.doobie.DoobieTransactor
 import com.ruchij.api.dao.user.DoobieUserDao
 import com.ruchij.api.services.hash.BCryptPasswordHashingService
 import com.ruchij.api.services.hash.PasswordHashingService
-import com.ruchij.api.services.health.ApplicationHealthService
-import com.ruchij.api.services.health.ApplicationHealthServiceImpl
+import com.ruchij.api.services.applicationhealth.ApplicationHealthService
+import com.ruchij.api.services.applicationhealth.ApplicationHealthServiceImpl
 import com.ruchij.api.services.user.UserService
 import com.ruchij.api.services.user.UserServiceImpl
 import com.ruchij.api.types.JodaClock

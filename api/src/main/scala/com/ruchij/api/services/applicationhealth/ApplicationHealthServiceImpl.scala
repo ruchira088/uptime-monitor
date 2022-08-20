@@ -1,10 +1,10 @@
-package com.ruchij.api.services.health
+package com.ruchij.api.services.applicationhealth
 
 import cats.effect.{Async, Clock, Concurrent, Sync}
 import cats.implicits.*
 import cats.~>
 import com.ruchij.api.config.BuildInformation
-import com.ruchij.api.services.health.models.{ServiceHealthStatus, HealthStatus, ServiceInformation}
+import com.ruchij.api.services.applicationhealth.models.{ServiceHealthStatus, HealthStatus, ServiceInformation}
 import com.ruchij.api.types.JodaClock
 import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator

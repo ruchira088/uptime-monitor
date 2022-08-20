@@ -1,7 +1,7 @@
 package com.ruchij.api.web
 
 import cats.effect.kernel.Async
-import com.ruchij.api.services.health.ApplicationHealthService
+import com.ruchij.api.services.applicationhealth.ApplicationHealthService
 import com.ruchij.api.services.user.UserService
 import com.ruchij.api.web.middleware.{ExceptionHandler, NotFoundHandler}
 import com.ruchij.api.web.routes.{HealthRoutes, UserRoutes}

@@ -1,4 +1,4 @@
-package com.ruchij.api.services.health.models
+package com.ruchij.api.services.applicationhealth.models
 
 import cats.effect.Sync
 import cats.implicits.toFunctorOps

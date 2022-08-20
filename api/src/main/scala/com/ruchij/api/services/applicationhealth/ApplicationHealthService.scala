@@ -1,6 +1,6 @@
-package com.ruchij.api.services.health
+package com.ruchij.api.services.applicationhealth
 
-import com.ruchij.api.services.health.models.{ServiceHealthStatus, ServiceInformation}
+import com.ruchij.api.services.applicationhealth.models.{ServiceHealthStatus, ServiceInformation}
 import org.http4s.Uri
 import org.http4s.implicits.uri
 

@@ -1,6 +1,7 @@
 package com.ruchij.api.dao.http
 
 import com.ruchij.api.dao.http.models.HttpHeader
+import com.ruchij.api.dao.http.models.HttpEndpoint
 import com.ruchij.api.dao.models.IDs.ID
 
 trait HttpHeaderDao[F[_]] {
