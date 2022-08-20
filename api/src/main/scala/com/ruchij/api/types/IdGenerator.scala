@@ -7,21 +7,30 @@ import cats.implicits.*
 import java.util.UUID
 
 import scala.reflect.ClassTag
+import com.ruchij.api.types.IdGenerator.IdPrefix
 
-trait IdGenerator[F[_], A] {
-    val generate: F[ID[A]]
+trait IdGenerator[F[_]] {
+    def generate[A: IdPrefix]: F[ID[A]]
 }
 
 object IdGenerator {
-    def apply[F[_], A](using idGenerator: IdGenerator[F, A]): IdGenerator[F, A] = idGenerator
+    trait IdPrefix[A] {
+        val value: String
+    }
 
-    given [F[_]: Sync, A](using classTag: ClassTag[A]): IdGenerator[F, A] with {
-        override val generate: F[ID[A]] = 
+    object IdPrefix {
+        def apply[A](using idPrefix: IdPrefix[A]): IdPrefix[A] = idPrefix
+
+        given [A](using classTag: ClassTag[A]): IdPrefix[A] with {
+            override val value: String = classTag.runtimeClass.getSimpleName().toLowerCase()
+        }
+    }
+
+    def apply[F[_]](using idGenerator: IdGenerator[F]): IdGenerator[F] = idGenerator
+
+    given [F[_]: Sync]: IdGenerator[F] with {
+        override def generate[A: IdPrefix]: F[ID[A]] = 
             Sync[F].delay(UUID.randomUUID().toString())
-                .map { uuid => 
-                    val prefix = classTag.runtimeClass.getSimpleName().toLowerCase()
-
-                    ID[A](s"$prefix-$uuid")
-                }
+                .map { uuid => ID[A](s"${IdPrefix[A].value}-$uuid") }
     }
 }

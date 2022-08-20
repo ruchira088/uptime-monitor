@@ -1,7 +1,7 @@
 package com.ruchij.api.web.routes
 
 import cats.effect.IO
-import com.ruchij.api.services.health.models.ServiceInformation
+import com.ruchij.api.services.applicationhealth.models.ServiceInformation
 import com.ruchij.api.test.mixins.io.MockedRoutesIO
 import com.ruchij.api.test.matchers.*
 import com.ruchij.api.test.utils.IOUtils.runIO

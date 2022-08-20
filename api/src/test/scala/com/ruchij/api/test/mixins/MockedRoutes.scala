@@ -1,7 +1,7 @@
 package com.ruchij.api.test.mixins
 
 import cats.effect.kernel.Sync
-import com.ruchij.api.services.health.ApplicationHealthService
+import com.ruchij.api.services.applicationhealth.ApplicationHealthService
 import com.ruchij.api.web.Routes
 import org.http4s.HttpApp
 import org.scalatest.{OneInstancePerTest, Suite}
