@@ -1,7 +1,7 @@
 package com.ruchij.api.test.mixins
 
 import cats.effect.kernel.Sync
-import com.ruchij.api.services.health.HealthService
+import com.ruchij.api.services.health.ServiceHealthService
 import com.ruchij.api.web.Routes
 import org.http4s.HttpApp
 import org.scalatest.{OneInstancePerTest, Suite}
@@ -12,7 +12,7 @@ import com.ruchij.api.services.user.UserService
 trait MockedRoutes[F[_]] extends MockitoSugar with OneInstancePerTest {  self: Suite =>
 
   val userService: UserService[F] = mock[UserService[F]]
-  val healthService: HealthService[F] = mock[HealthService[F]]
+  val healthService: ServiceHealthService[F] = mock[ServiceHealthService[F]]
 
   val async: Async[F]
 

@@ -4,7 +4,7 @@ import cats.effect.{Async, Clock, Concurrent, Sync}
 import cats.implicits.*
 import cats.~>
 import com.ruchij.api.config.BuildInformation
-import com.ruchij.api.services.health.models.{HealthCheck, HealthStatus, ServiceInformation}
+import com.ruchij.api.services.health.models.{ServiceHealthStatus, HealthStatus, ServiceInformation}
 import com.ruchij.api.types.JodaClock
 import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator
@@ -16,9 +16,9 @@ import org.http4s.Status
 import cats.Applicative.apply
 import cats.Applicative
 
-class HealthServiceImpl[F[_]: JodaClock: Async](client: Client[F], buildInformation: BuildInformation)(using
+class ApplicationHealthServiceImpl[F[_]: JodaClock: Async](client: Client[F], buildInformation: BuildInformation)(using
   transaction: ConnectionIO ~> F
-) extends HealthService[F] {
+) extends ApplicationHealthService[F] {
   private val http4sClientDsl = new Http4sClientDsl[F] {}
 
   import http4sClientDsl._
@@ -36,22 +36,22 @@ class HealthServiceImpl[F[_]: JodaClock: Async](client: Client[F], buildInformat
 
   private val internetConnectivityCheck: F[HealthStatus] =
     client
-      .status(GET(HealthService.ConnectivityUrl))
+      .status(GET(ApplicationHealthService.ConnectivityUrl))
       .map(status => if status == Status.Ok then HealthStatus.Healthy else HealthStatus.Unhealthy)
 
   private def runWithTimeout(run: F[HealthStatus]): F[HealthStatus] =
     Concurrent[F]
-      .race(run, Clock[F].sleep(HealthService.Timeout))
+      .race(run, Clock[F].sleep(ApplicationHealthService.Timeout))
       .map {
         case Left(healthStatus) => healthStatus
         case _ => HealthStatus.Unhealthy
       }
 
-  override val healthCheck: F[HealthCheck] =
+  override val healthCheck: F[ServiceHealthStatus] =
     for {
       databaseHealthFiber <- Concurrent[F].start(runWithTimeout(databaseHealthCheck))
 
       internetConnectivityHealthStatus <- runWithTimeout(internetConnectivityCheck)
       databaseHealthStatus <- databaseHealthFiber.joinWith(Applicative[F].pure(HealthStatus.Unhealthy))
-    } yield HealthCheck(database = databaseHealthStatus, internetConnectivity = internetConnectivityHealthStatus)
+    } yield ServiceHealthStatus(database = databaseHealthStatus, internetConnectivity = internetConnectivityHealthStatus)
 }

@@ -15,8 +15,8 @@ import com.ruchij.api.dao.doobie.DoobieTransactor
 import com.ruchij.api.dao.user.DoobieUserDao
 import com.ruchij.api.services.hash.BCryptPasswordHashingService
 import com.ruchij.api.services.hash.PasswordHashingService
-import com.ruchij.api.services.health.HealthService
-import com.ruchij.api.services.health.HealthServiceImpl
+import com.ruchij.api.services.health.ApplicationHealthService
+import com.ruchij.api.services.health.ApplicationHealthServiceImpl
 import com.ruchij.api.services.user.UserService
 import com.ruchij.api.services.user.UserServiceImpl
 import com.ruchij.api.types.JodaClock
@@ -63,14 +63,14 @@ object ApiApp extends IOApp {
   ): HttpApp[F] = {
     given FunctionK[ConnectionIO, F] = hikariTransactor.trans
 
-    val healthService: HealthService[F] =
-      HealthServiceImpl[F](client, serviceConfiguration.buildInformation)
+    val applicationHealthService: ApplicationHealthService[F] =
+      ApplicationHealthServiceImpl[F](client, serviceConfiguration.buildInformation)
 
     val passwordHashingService: PasswordHashingService[F] = BCryptPasswordHashingService[F]
 
     val userService: UserService[F] =
       UserServiceImpl[F, ConnectionIO](passwordHashingService, DoobieUserDao, DoobieCredentialsDao)
 
-    Routes(userService, healthService)
+    Routes(userService, applicationHealthService)
   }
 }
