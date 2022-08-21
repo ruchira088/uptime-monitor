@@ -2,7 +2,7 @@ package com.ruchij.api.web.routes
 
 import cats.effect.Sync
 import cats.implicits.toFlatMapOps
-import com.ruchij.api.circe.Encoders.given_Encoder_DateTime
+import com.ruchij.api.circe.Encoders.given
 import com.ruchij.api.services.applicationhealth.ApplicationHealthService
 import io.circe.generic.auto.deriveEncoder
 import org.http4s.HttpRoutes
@@ -17,6 +17,14 @@ object ServiceRoutes {
       case GET -> Root / "info" =>
         applicationHealthService.serviceInformation
           .flatMap(serviceInformation => Ok(serviceInformation))
+
+      case GET -> Root / "health" =>
+        applicationHealthService.healthCheck
+          .flatMap {
+            serviceHealthStatus => 
+              if serviceHealthStatus.isHealthy 
+              then Ok(serviceHealthStatus) else ServiceUnavailable(serviceHealthStatus)
+          }
     }
   }
 }

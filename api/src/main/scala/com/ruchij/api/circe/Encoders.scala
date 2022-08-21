@@ -5,10 +5,15 @@ import io.circe.Encoder
 import org.joda.time.DateTime
 import com.ruchij.api.dao.models.IDs.ID
 
+import scala.compiletime.{constValue, erasedValue, error, summonInline}
+import scala.deriving.Mirror
+
 object Encoders {
   given Encoder[DateTime] = Encoder.encodeString.contramap[DateTime](_.toString)
 
   given Encoder[Email] = Encoder.encodeString.contramap(_.toString)
 
   given [A]: Encoder[ID[A]] = Encoder.encodeString.contramap(_.toString)
+
+  given [A <: Enum[A]]: Encoder[A] = Encoder.encodeString.contramap[A](_.name())
 }
