@@ -11,7 +11,7 @@ RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /e
     sudo apt-get update && \
     sudo apt-get install sbt
 
-WORKDIR /opt/uptime-monitor
+WORKDIR /opt/uptime-monitor-api
 
 COPY . .
 
