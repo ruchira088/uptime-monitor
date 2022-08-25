@@ -4,8 +4,8 @@ import cats.effect.kernel.Async
 import cats.implicits.*
 import com.ruchij.api.circe.Decoders.given
 import com.ruchij.api.circe.Encoders.given
+import com.ruchij.api.dao.user.models.User
 import com.ruchij.api.services.authentication.AuthenticationService
-import com.ruchij.api.services.authentication.models.AuthenticationSession
 import com.ruchij.api.web.middleware.UserAuthenticator
 import com.ruchij.api.web.requests.UserLoginRequest
 import io.circe.generic.auto.*
@@ -29,12 +29,8 @@ object AuthenticationRoutes {
         yield response.addCookie(UserAuthenticator.AuthenticationCookie, authenticationToken.secret.toString)
     } <+>
       UserAuthenticator[F](authenticationService).apply {
-        ContextRoutes.of[AuthenticationSession, F] {
-          case GET -> Root / "user" as authenticationSession => Ok(authenticationSession.user)
-
-          case DELETE -> Root / "logout" as authenticationSession =>
-            authenticationService.logout(authenticationSession.authenticationToken.secret)
-              .productR(Ok(authenticationSession.user))
+        ContextRoutes.of[User, F] {
+          case GET -> Root / "user" as user => Ok(user)
         }
       }
   }
