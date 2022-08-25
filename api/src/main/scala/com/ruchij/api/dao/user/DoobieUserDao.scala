@@ -5,6 +5,7 @@ import com.ruchij.api.dao.user.models.Emails.Email
 import com.ruchij.api.dao.user.models.User
 import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator
+import com.ruchij.api.dao.models.IDs.ID
 
 object DoobieUserDao extends UserDao[ConnectionIO] {
 
@@ -28,7 +29,7 @@ object DoobieUserDao extends UserDao[ConnectionIO] {
   override def findByEmail(email: Email): ConnectionIO[Option[User]] =
     (SelectQuery ++ fr"WHERE email = $email").query[User].option
 
-  override def findById(userId: String): ConnectionIO[Option[User]] =
+  override def findById(userId: ID[User]): ConnectionIO[Option[User]] =
     (SelectQuery ++ fr"WHERE id = $userId").query[User].option
 
 }

@@ -4,7 +4,7 @@ import java.sql.Driver
 import org.{h2, postgresql}
 import scala.reflect.ClassTag
 
-enum DatabaseDriver[A <: Driver](using classTag: ClassTag[A]) extends Enum[DatabaseDriver[?]] { self =>
+enum DatabaseDriver[A <: Driver](using classTag: ClassTag[A]) extends Enum[DatabaseDriver[_]] { self =>
   case PostgreSQL extends DatabaseDriver[postgresql.Driver]
   case H2 extends DatabaseDriver[h2.Driver]
 
