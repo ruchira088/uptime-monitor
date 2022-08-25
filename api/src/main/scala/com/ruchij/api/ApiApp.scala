@@ -71,6 +71,6 @@ object ApiApp extends IOApp {
     val userService: UserService[F] =
       UserServiceImpl[F, ConnectionIO](passwordHashingService, DoobieUserDao, DoobieCredentialsDao)
 
-    Routes(userService, applicationHealthService)
+    Routes(userService, ???, applicationHealthService)
   }
 }

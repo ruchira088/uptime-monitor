@@ -10,7 +10,8 @@ final case class AuthenticationToken(
   createdAt: DateTime,
   updatedAt: DateTime,
   userId: ID[User],
-  renewals: Long
+  renewals: Long,
+  expiresAt: DateTime
 )
 
 object AuthenticationToken {

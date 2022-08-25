@@ -1,25 +1,26 @@
 package com.ruchij.api.web.middleware
 
+import cats.ApplicativeError
+import cats.MonadThrow
+import cats.data.Kleisli
+import cats.data.OptionT
+import cats.effect.kernel.Sync
+import com.ruchij.api.dao.user.models.User
+import com.ruchij.api.exceptions.AuthenticationException
 import com.ruchij.api.services.authentication.AuthenticationService
 import com.ruchij.api.services.authentication.models.AuthenticationToken.AuthenticationSecret
-import com.ruchij.api.exceptions.AuthenticationException
-import org.http4s.server.AuthMiddleware
-import com.ruchij.api.dao.user.models.User
-import cats.data.OptionT
-import cats.data.Kleisli
+import com.ruchij.api.services.authentication.models.AuthenticationSession
+import org.http4s.ContextRequest
+import org.http4s.Credentials.Token
 import org.http4s.Request
 import org.http4s.Response
 import org.http4s.headers.Authorization
-import org.http4s.Credentials.Token
-import cats.effect.kernel.Sync
-import cats.MonadThrow
-import cats.ApplicativeError
-import org.http4s.ContextRequest
+import org.http4s.server.AuthMiddleware
 
 object UserAuthenticator {
   val AuthenticationCookie = "authentication-cookie"
 
-  def apply[F[_]: MonadThrow](authenticationService: AuthenticationService[F]): AuthMiddleware[F, User] =
+  def apply[F[_]: MonadThrow](authenticationService: AuthenticationService[F]): AuthMiddleware[F, AuthenticationSession] =
     authenticatedRoutes =>
       Kleisli[[A] =>> OptionT[F, A], Request[F], Response[F]] { request => 
         OptionT.fromOption[F](token(request).orElse(authenticationCookie(request)))
@@ -29,8 +30,8 @@ object UserAuthenticator {
             }
           }
           .semiflatMap(authenticationService.authenticate)
-          .flatMap { user => 
-            authenticatedRoutes.run(ContextRequest[F, User](user, request)) 
+          .flatMap { authenticationSession => 
+            authenticatedRoutes.run(ContextRequest[F, AuthenticationSession](authenticationSession, request)) 
           }
       }
 

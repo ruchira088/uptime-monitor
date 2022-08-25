@@ -34,7 +34,7 @@ class ServiceRoutesSpec extends AnyFlatSpec with Matchers with MockedRoutesIO {
 
     for {
       _ <- IO.delay {
-        when(healthService.serviceInformation)
+        when(applicationHealthService.serviceInformation)
           .thenReturn {
             IO.pure {
               ServiceInformation(
