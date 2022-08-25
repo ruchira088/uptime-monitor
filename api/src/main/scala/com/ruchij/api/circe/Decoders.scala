@@ -2,8 +2,11 @@ package com.ruchij.api.circe
 
 import com.ruchij.api.dao.user.models.Emails.Email
 import com.ruchij.api.dao.user.models.Passwords.Password
+import com.ruchij.api.services.authentication.models.AuthenticationToken.AuthenticationSecret
 import io.circe.Decoder
 import org.joda.time.DateTime
+import com.ruchij.api.dao.models.IDs.ID
+import com.ruchij.api.types.IdGenerator.IdPrefix
 
 import scala.util.Try
 import scala.compiletime.{constValue, erasedValue, error, summonInline}
@@ -18,7 +21,13 @@ object Decoders {
     Decoder.decodeString.emap(emailString => Email(emailString).left.map(_.message))
     
   given Decoder[Password] =
-    Decoder.decodeString.map(password => Password(password))  
+    Decoder.decodeString.map(password => Password(password))
+
+  given Decoder[AuthenticationSecret] =
+    Decoder.decodeString.map(secret => AuthenticationSecret(secret))
+
+  given [A](using IdPrefix[A], ClassTag[A]): Decoder[ID[A]] =
+    Decoder.decodeString.emap { id => ID.parse[A](id).left.map(_.message) }
 
   inline given [A <: Enum[A]](using mirror: Mirror.SumOf[A], classTag: ClassTag[A]): Decoder[A] = {
     val enumValues = values[mirror.MirroredElemTypes, A]
