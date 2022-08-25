@@ -8,6 +8,7 @@ import com.ruchij.api.dao.user.models.User
 import com.ruchij.api.services.authentication.AuthenticationService
 import com.ruchij.api.web.middleware.UserAuthenticator
 import com.ruchij.api.web.requests.UserLoginRequest
+import com.ruchij.api.types.FunctionKTypes.{given, *}
 import io.circe.generic.auto.*
 import org.http4s.ContextRoutes
 import org.http4s.HttpRoutes
@@ -26,7 +27,16 @@ object AuthenticationRoutes {
           authenticationToken <- authenticationService.login(userLoginRequest.email, userLoginRequest.password)
           response <- Created(authenticationToken)
         }
-        yield response.addCookie(UserAuthenticator.AuthenticationCookie, authenticationToken.secret.toString)
+        yield response.addCookie(UserAuthenticator.AuthenticationCookieName, authenticationToken.secret.toString)
+
+      case request @ GET -> Root / "logout" =>
+        for {
+          authenticationSecret <- UserAuthenticator.authenticationSecret(request).toType[F, Throwable]
+          user <- authenticationService.logout(authenticationSecret)
+          response <- Ok(user)
+        }
+        yield response
+
     } <+>
       UserAuthenticator[F](authenticationService).apply {
         ContextRoutes.of[User, F] {
