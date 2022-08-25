@@ -3,7 +3,7 @@ import sbt._
 object Dependencies
 {
   val ScalaVersion = "3.1.3"
-  val Http4sVersion = "0.23.14"
+  val Http4sVersion = "0.23.15"
   val CirceVersion = "0.14.2"
 
   lazy val http4sDsl = "org.http4s" %% "http4s-dsl" % Http4sVersion
@@ -24,7 +24,7 @@ object Dependencies
 
   lazy val doobieHikari = "org.tpolecat" %% "doobie-hikari" % "1.0.0-RC2"
 
-  lazy val postgresql = "org.postgresql" % "postgresql" % "42.4.2"
+  lazy val postgresql = "org.postgresql" % "postgresql" % "42.5.0"
 
   lazy val h2 = "com.h2database" % "h2" % "2.1.214"
 
