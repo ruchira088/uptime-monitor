@@ -14,6 +14,7 @@ import com.ruchij.api.dao.user.models.User
 import com.ruchij.api.exceptions.{AuthenticationException, ResourceNotFoundException}
 import com.ruchij.api.kvstore.{KeyValueStore, Keyspace, KeyspacedKeyValueStore}
 import com.ruchij.api.services.authentication.AuthenticationServiceImpl.given
+import com.ruchij.api.services.authentication.AuthenticationServiceImpl.Session
 import com.ruchij.api.services.authentication.models.AuthenticationToken
 import com.ruchij.api.services.authentication.models.AuthenticationToken.AuthenticationSecret
 import com.ruchij.api.services.hash.PasswordHashingService
@@ -22,6 +23,7 @@ import com.ruchij.api.types.{IdGenerator, JodaClock}
 import io.circe.generic.auto.*
 
 import scala.concurrent.duration.FiniteDuration
+import cats.syntax.validated
 
 class AuthenticationServiceImpl[F[_]: MonadThrow: JodaClock: IdGenerator, G[_]: MonadThrow](
   keyValueStore: KeyValueStore[F],
@@ -70,31 +72,50 @@ class AuthenticationServiceImpl[F[_]: MonadThrow: JodaClock: IdGenerator, G[_]: 
       }
 
   override def authenticate(authenticationSecret: AuthenticationSecret): F[User] =
+    for {
+      session <- validate(authenticationSecret)
+      timestamp <- JodaClock[F].timestamp
+
+      token = 
+        session.authenticationToken
+          .copy(
+            expiresAt = timestamp.plus(authenticationConfiguration.sessionDuration.toMillis),
+            renewals = session.authenticationToken.renewals + 1
+          )
+
+      _ <- keyspacedKeyValueStore.put(authenticationSecret, token, Some(authenticationConfiguration.sessionDuration))
+    } yield session.user
+
+  override def logout(authenticationSecret: AuthenticationSecret): F[User] =
+    validate(authenticationSecret)
+      .flatMap { session =>
+        keyspacedKeyValueStore.delete(authenticationSecret).as(session.user)  
+      }
+  
+  private def validate(authenticationSecret: AuthenticationSecret): F[Session] =
     OptionT(keyspacedKeyValueStore.get(authenticationSecret))
       .getOrRaise(AuthenticationException("Authentication token not found"))
       .flatMap { authenticationToken =>
         JodaClock[F].timestamp
-          .map { timestamp =>
-            authenticationToken.copy(expiresAt = timestamp.plus(authenticationConfiguration.sessionDuration.toMillis))
+          .flatMap { timestamp =>
+            if authenticationToken.expiresAt.isAfter(timestamp) 
+            then Applicative[F].pure(authenticationToken)
+            else ApplicativeError[F, Throwable].raiseError {
+              AuthenticationException("Authentication token is expired")
+            }
           }  
       }
-      .flatTap { updatedAuthenticationToken =>
-        keyspacedKeyValueStore.put(
-          authenticationSecret, 
-          updatedAuthenticationToken, 
-          Some(authenticationConfiguration.sessionDuration)
-        )  
+      .flatMap { authenticationToken =>
+        OptionT(transaction(userDao.findById(authenticationToken.userId)))
+          .getOrRaise(ResourceNotFoundException(s"User not found with id=${authenticationToken.userId}"))
+          .map(user => Session(user, authenticationToken))
       }
-      .flatMap { updatedAuthenticationToken =>
-        OptionT(transaction(userDao.findById(updatedAuthenticationToken.userId)))
-          .getOrRaise(ResourceNotFoundException(s"User not found with id=${updatedAuthenticationToken.userId}"))
-      }
-
-  override def logout(authenticationSecret: AuthenticationSecret): F[User] = ???
 
 }
 
 object AuthenticationServiceImpl {
+  private final case class Session(user: User, authenticationToken: AuthenticationToken)
+
   given Keyspace[AuthenticationSecret, AuthenticationToken] =
     Keyspace[AuthenticationSecret, AuthenticationToken](AuthenticationSecret("authentication-"))
 
