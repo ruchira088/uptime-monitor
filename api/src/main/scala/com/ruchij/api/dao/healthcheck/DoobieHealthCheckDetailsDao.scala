@@ -6,6 +6,7 @@ import com.ruchij.api.dao.models.IDs.ID
 import com.ruchij.api.dao.user.models.User
 import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator
+import doobie.Fragments.orOpt
 
 object DoobieHealthCheckDetailsDao extends HealthCheckDetailsDao[ConnectionIO] {
   private val SelectQuery = sql"SELECT id, name, description, created_at, user_id, http_endpoint_id FROM health_check"
@@ -25,8 +26,8 @@ object DoobieHealthCheckDetailsDao extends HealthCheckDetailsDao[ConnectionIO] {
       .update
       .run
 
-  override def findById(id: ID[HealthCheckDetails]): ConnectionIO[Option[HealthCheckDetails]] =
-    (SelectQuery ++ fr"WHERE id = $id").query[HealthCheckDetails].option
+  override def findById(id: ID[HealthCheckDetails], maybeUserId: Option[ID[User]]): ConnectionIO[Option[HealthCheckDetails]] =
+    (SelectQuery ++ fr"WHERE id = $id" ++ orOpt(maybeUserId.map(userId => fr"user_id = $userId"))).query[HealthCheckDetails].option
 
   override def findByUserId(id: ID[User]): ConnectionIO[Seq[HealthCheckDetails]] =
     (SelectQuery ++ fr"WHERE user_id = $id").query[HealthCheckDetails].to[Seq]

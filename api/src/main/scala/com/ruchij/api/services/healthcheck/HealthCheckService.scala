@@ -19,5 +19,7 @@ trait HealthCheckService[F[_]] {
     body: Option[Seq[Byte]]
   ): F[HealthCheck]
 
-  def getById(userId: ID[User], id: ID[HealthCheckDetails]): F[HealthCheck]
+  def getById(id: ID[HealthCheckDetails], userId: ID[User]): F[HealthCheck]
+  
+  def getByUserId(userId: ID[User]): F[Seq[HealthCheck]]
 }
