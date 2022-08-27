@@ -7,7 +7,7 @@ import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator
 
 object DoobieHttpRequestBodyDao extends HttpRequestBodyDao[ConnectionIO] {
-  private val SelectQuery = sql"SELECT FROM id, created_at, http_endpoint_id, content_type, body"
+  private val SelectQuery = sql"SELECT id, created_at, http_endpoint_id, content_type, body FROM http_request_body"
 
   override def insert(httpRequestBody: HttpRequestBody): ConnectionIO[Int] =
     sql"""
