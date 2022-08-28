@@ -4,11 +4,15 @@ import cats.effect.Async
 import cats.implicits.*
 import com.ruchij.api.circe.Decoders.given
 import com.ruchij.api.circe.Encoders.given
+import com.ruchij.api.dao.healthcheck.models.HealthCheckDetails
+import com.ruchij.api.dao.models.IDs.ID
 import com.ruchij.api.dao.user.models.User
 import com.ruchij.api.services.authentication.AuthenticationService
 import com.ruchij.api.services.healthcheck.HealthCheckService
+import com.ruchij.api.services.healthcheck.models.HealthCheck
 import com.ruchij.api.web.middleware.UserAuthenticator
 import com.ruchij.api.web.requests.CreateHealthCheckRequest
+import com.ruchij.api.types.FunctionKTypes.{*, given}
 import org.http4s.{ContextRoutes, HttpRoutes}
 import io.circe.generic.auto.*
 import org.http4s.dsl.Http4sDsl
@@ -38,6 +42,14 @@ object HealthCheckRoutes {
               )
 
             response <- Created(healthCheck)
+          }
+          yield response
+
+        case GET -> Root / "id" / id as user =>
+          for {
+            healthCheckDetailsId <- ID.parse[HealthCheckDetails](id).toType[F, Throwable]
+            healthCheck <- healthCheckService.getById(healthCheckDetailsId, Some(user.id))
+            response <- Ok(healthCheck)
           }
           yield response
       }

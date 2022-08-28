@@ -49,7 +49,7 @@ object Decoders {
   private inline def values[T <: Tuple, A <: Enum[A]]: List[A] =
     inline erasedValue[T] match
       case EmptyTuple => Nil
-      case _: (head *: tail) => 
+      case _: (head *: tail) =>
         inline summonInline[Mirror.Of[head]] match
           case value: A =>
             value :: values[tail, A]

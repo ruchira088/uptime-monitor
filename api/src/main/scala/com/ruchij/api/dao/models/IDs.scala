@@ -9,11 +9,11 @@ object IDs {
   opaque type ID[A] = String
 
   object ID {
-    def apply[A](id: String): ID[A] = id
+    def create[A](id: String): ID[A] = id
 
     def parse[A](input: String)(using idPrefix: IdPrefix[A], classTag: ClassTag[A]): Either[ValidationException, ID[A]] =
       if input.startsWith(idPrefix.value) 
-        then Right(ID[A](input)) 
+        then Right(ID.create[A](input))
         else Left(ValidationException(s"$input cannot be an ID of ${classTag.runtimeClass.getCanonicalName}"))
   }
 }
