@@ -28,7 +28,7 @@ object Dependencies
 
   lazy val h2 = "com.h2database" % "h2" % "2.1.214"
 
-  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.1.6"
+  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.2.0"
 
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.3.14"
 
@@ -38,7 +38,7 @@ object Dependencies
 
   lazy val embeddedRedis = "com.github.kstyrc" % "embedded-redis" % "0.6"
 
-  lazy val jodaTime = "joda-time" % "joda-time" % "2.11.0"
+  lazy val jodaTime = "joda-time" % "joda-time" % "2.11.1"
 
   lazy val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.1"
 
