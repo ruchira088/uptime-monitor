@@ -14,7 +14,7 @@ inThisBuild {
     organization := "com.ruchij",
     scalaVersion := Dependencies.ScalaVersion,
     maintainer := "me@ruchij.com",
-    scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked"),
+    scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Xmax-inlines", "50"),
   )
 }
 
