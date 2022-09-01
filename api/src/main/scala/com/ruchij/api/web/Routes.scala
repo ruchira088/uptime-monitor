@@ -12,7 +12,11 @@ import org.http4s.{HttpApp, HttpRoutes}
 import com.ruchij.api.services.authentication.AuthenticationService
 
 object Routes {
-  def apply[F[_]: Async](userService: UserService[F], authenticationService: AuthenticationService[F], applicationHealthService: ApplicationHealthService[F]): HttpApp[F] = {
+  def apply[F[_]: Async](
+    userService: UserService[F],
+    authenticationService: AuthenticationService[F],
+    applicationHealthService: ApplicationHealthService[F]
+  ): HttpApp[F] = {
     given Http4sDsl[F] = new Http4sDsl[F] {}
 
     val routes: HttpRoutes[F] =
