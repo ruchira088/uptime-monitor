@@ -10,11 +10,14 @@ import org.http4s.server.Router
 import org.http4s.server.middleware.GZip
 import org.http4s.{HttpApp, HttpRoutes}
 import com.ruchij.api.services.authentication.AuthenticationService
+import com.ruchij.api.services.healthcheck.HealthCheckService
+import com.ruchij.api.web.routes.HealthCheckRoutes
 
 object Routes {
   def apply[F[_]: Async](
     userService: UserService[F],
     authenticationService: AuthenticationService[F],
+    healthCheckService: HealthCheckService[F],
     applicationHealthService: ApplicationHealthService[F]
   ): HttpApp[F] = {
     given Http4sDsl[F] = new Http4sDsl[F] {}
@@ -23,6 +26,7 @@ object Routes {
       Router(
         "/user" -> UserRoutes(userService),
         "/authentication" -> AuthenticationRoutes(authenticationService),
+        "/health-check" -> HealthCheckRoutes(healthCheckService, authenticationService),
         "/service" -> ServiceRoutes(applicationHealthService)
       )
 

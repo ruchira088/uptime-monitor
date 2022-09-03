@@ -32,6 +32,14 @@ import pureconfig.ConfigSource
 import dev.profunktor.redis4cats.RedisCommands
 import com.ruchij.api.kvstore.RedisKeyValueStore
 import com.ruchij.api.services.authentication.AuthenticationServiceImpl
+import com.ruchij.api.kvstore.KeyValueStore
+import com.ruchij.api.services.authentication.AuthenticationService
+import com.ruchij.api.services.healthcheck.HealthCheckService
+import com.ruchij.api.services.healthcheck.HealthCheckServiceImpl
+import com.ruchij.api.dao.healthcheck.DoobieHealthCheckDetailsDao
+import com.ruchij.api.dao.http.DoobieHttpEndpointDao
+import com.ruchij.api.dao.http.DoobieHttpHeaderDao
+import com.ruchij.api.dao.http.DoobieHttpRequestBodyDao
 
 object ApiApp extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
@@ -68,7 +76,7 @@ object ApiApp extends IOApp {
   ): HttpApp[F] = {
     given FunctionK[ConnectionIO, F] = hikariTransactor.trans
 
-    val redisKeyValueStore = RedisKeyValueStore(redisCommands)
+    val redisKeyValueStore: KeyValueStore[F] = RedisKeyValueStore(redisCommands)
 
     val applicationHealthService: ApplicationHealthService[F] =
       ApplicationHealthServiceImpl[F](client, redisKeyValueStore, serviceConfiguration.buildInformation)
@@ -78,7 +86,7 @@ object ApiApp extends IOApp {
     val userService: UserService[F] =
       UserServiceImpl[F, ConnectionIO](passwordHashingService, DoobieUserDao, DoobieCredentialsDao)
 
-    val authenticationService =
+    val authenticationService: AuthenticationService[F] =
       AuthenticationServiceImpl(
         redisKeyValueStore, 
         passwordHashingService, 
@@ -87,6 +95,14 @@ object ApiApp extends IOApp {
         serviceConfiguration.authenticationConfiguration
       )
 
-    Routes(userService, authenticationService, applicationHealthService)
+    val healthCheckService: HealthCheckService[F] =
+      HealthCheckServiceImpl(
+        DoobieHealthCheckDetailsDao, 
+        DoobieHttpEndpointDao,
+        DoobieHttpHeaderDao,
+        DoobieHttpRequestBodyDao
+      )
+
+    Routes(userService, authenticationService, healthCheckService, applicationHealthService)
   }
 }

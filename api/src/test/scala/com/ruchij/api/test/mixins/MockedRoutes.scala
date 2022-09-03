@@ -9,16 +9,18 @@ import org.scalatestplus.mockito.MockitoSugar
 import cats.effect.kernel.Async
 import com.ruchij.api.services.authentication.AuthenticationService
 import com.ruchij.api.services.user.UserService
+import com.ruchij.api.services.healthcheck.HealthCheckService
 
 trait MockedRoutes[F[_]] extends MockitoSugar with OneInstancePerTest {  self: Suite =>
 
   val userService: UserService[F] = mock[UserService[F]]
   val authenticationService: AuthenticationService[F] = mock[AuthenticationService[F]]
+  val healthCheckService: HealthCheckService[F] = mock[HealthCheckService[F]]
   val applicationHealthService: ApplicationHealthService[F] = mock[ApplicationHealthService[F]]
 
   val async: Async[F]
 
   def createRoutes: HttpApp[F] =
-    Routes[F](userService, authenticationService, applicationHealthService)(async)
+    Routes[F](userService, authenticationService, healthCheckService, applicationHealthService)(async)
 
 }
