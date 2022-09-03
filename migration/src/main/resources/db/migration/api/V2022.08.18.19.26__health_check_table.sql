@@ -1,6 +1,6 @@
 CREATE TABLE health_check (
     id VARCHAR(63),
-    name VARCHAR(64) NOT NULL,
+    name VARCHAR(63) NOT NULL,
     description VARCHAR(255),
     created_at TIMESTAMP NOT NULL,
     user_id VARCHAR(63) NOT NULL,
