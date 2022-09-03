@@ -4,7 +4,7 @@ import cats.effect.{Async, Clock, Concurrent, Sync}
 import cats.implicits.*
 import cats.~>
 import com.ruchij.api.config.BuildInformation
-import com.ruchij.api.services.applicationhealth.models.{ServiceHealthStatus, HealthStatus, ServiceInformation}
+import com.ruchij.api.services.applicationhealth.models.{HealthStatus, ServiceHealthStatus, ServiceInformation}
 import com.ruchij.api.types.JodaClock
 import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator
@@ -15,10 +15,17 @@ import org.http4s.implicits.uri
 import org.http4s.Status
 import cats.Applicative.apply
 import cats.Applicative
+import com.ruchij.api.kvstore.KeyValueStore
+import com.ruchij.api.types.IdGenerator
+import com.ruchij.api.dao.models.IDs.ID
+import cats.effect.kernel.Fiber
 
-class ApplicationHealthServiceImpl[F[_]: JodaClock: Async](client: Client[F], buildInformation: BuildInformation)(using
-  transaction: ConnectionIO ~> F
-) extends ApplicationHealthService[F] {
+class ApplicationHealthServiceImpl[F[_]: JodaClock: Async: IdGenerator](
+  client: Client[F],
+  keyValueStore: KeyValueStore[F],
+  buildInformation: BuildInformation
+)(using transaction: ConnectionIO ~> F)
+    extends ApplicationHealthService[F] {
   private val http4sClientDsl = new Http4sClientDsl[F] {}
 
   import http4sClientDsl._
@@ -34,6 +41,19 @@ class ApplicationHealthServiceImpl[F[_]: JodaClock: Async](client: Client[F], bu
         case _ => HealthStatus.Unhealthy
       }
 
+  private val keyValueStoreCheck: F[HealthStatus] =
+    for {
+      key <- IdGenerator[F].generate[String].map(_.toString)
+      value <- IdGenerator[F].generate[String].map(_.toString)
+
+      _ <- keyValueStore.put(key, value, None)
+      persistedValue <- keyValueStore.get[String, String](key)
+
+      _ <- keyValueStore.delete(key)
+
+      healthStatus = if persistedValue == Some(value) then HealthStatus.Healthy else HealthStatus.Unhealthy
+    } yield healthStatus
+
   private val internetConnectivityCheck: F[HealthStatus] =
     client
       .status(GET(ApplicationHealthService.ConnectivityUrl))
@@ -46,12 +66,26 @@ class ApplicationHealthServiceImpl[F[_]: JodaClock: Async](client: Client[F], bu
         case Left(healthStatus) => healthStatus
         case _ => HealthStatus.Unhealthy
       }
+      .recover { _ => HealthStatus.Unhealthy }
+
+  private def waitForHealthStatus(fiber: Fiber[F, Throwable, HealthStatus]): F[HealthStatus] =
+    fiber.joinWith(Applicative[F].pure(HealthStatus.Unhealthy))
 
   override val healthCheck: F[ServiceHealthStatus] =
     for {
       databaseHealthFiber <- Concurrent[F].start(runWithTimeout(databaseHealthCheck))
-
+      keyValueStoreHealthFiber <- Concurrent[F].start(runWithTimeout(keyValueStoreCheck))
       internetConnectivityHealthStatus <- runWithTimeout(internetConnectivityCheck)
-      databaseHealthStatus <- databaseHealthFiber.joinWith(Applicative[F].pure(HealthStatus.Unhealthy))
-    } yield ServiceHealthStatus(database = databaseHealthStatus, internetConnectivity = internetConnectivityHealthStatus)
+
+      databaseHealthStatus <- waitForHealthStatus(databaseHealthFiber)
+      keyValueStoreHealthStatus <- waitForHealthStatus(keyValueStoreHealthFiber)
+
+      serviceHealthStatus =
+        ServiceHealthStatus(
+          database = databaseHealthStatus,
+          keyValueStore = keyValueStoreHealthStatus,
+          internetConnectivity = internetConnectivityHealthStatus
+        )
+
+    } yield serviceHealthStatus
 }

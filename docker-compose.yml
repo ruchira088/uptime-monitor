@@ -30,12 +30,17 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       migration:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: "jdbc:postgresql://postgres:5432/uptime-monitor"
       DATABASE_USER: "admin"
-      DATABASE_PASSWORD: "password"
+      DATABASE_PASSWORD: "my-postgres-password"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: "my-redis-password"
     volumes:
       - ./src/main/resources/logback.xml:/opt/data/logback.xml
       - ./docker-compose/scripts:/opt/scripts
@@ -49,7 +54,7 @@ services:
       APPLICATION: "api"
       DATABASE_URL: "jdbc:postgresql://postgres:5432/uptime-monitor"
       DATABASE_USER: "admin"
-      DATABASE_PASSWORD: "password"
+      DATABASE_PASSWORD: "my-postgres-password"
   
   postgres:
     image: postgres
@@ -64,4 +69,15 @@ services:
     environment:
       POSTGRES_DB: "uptime-monitor"
       POSTGRES_USER: "admin"
-      POSTGRES_PASSWORD: "password"
+      POSTGRES_PASSWORD: "my-postgres-password"
+  
+  redis:
+    image: redis
+    command: "redis-server --requirepass my-redis-password"
+    healthcheck:
+      test: "redis-cli ping"
+      start_period: 2s
+      interval: 2s
+      timeout: 1s
+    ports:
+      - 6379:6379

@@ -15,5 +15,5 @@ trait ApplicationHealthService[F[_]] {
 
 object ApplicationHealthService {
   val ConnectivityUrl: Uri = uri"https://ip.ruchij.com"
-  val Timeout: FiniteDuration = 30 seconds
+  val Timeout: FiniteDuration = 15 seconds
 }

@@ -14,10 +14,11 @@ import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
 import pureconfig.{ConfigObjectSource, ConfigSource}
 import com.ruchij.api.config.AuthenticationConfiguration
-import scala.concurrent.duration.FiniteDuration
-import java.util.concurrent.TimeUnit
 
-object AppStack extends IOApp {
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.language.postfixOps
+
+object ApplicationStack extends IOApp {
 
   val DatabaseConfig: DatabaseConfiguration =
     DatabaseConfiguration(
@@ -28,7 +29,7 @@ object AppStack extends IOApp {
     
   val RedisConfig: RedisConfiguration = ???
 
-  val AuthenticationConfig = AuthenticationConfiguration(FiniteDuration(7, TimeUnit.DAYS))
+  val AuthenticationConfig = AuthenticationConfiguration(7 days)
 
   val HttpConfig: HttpConfiguration = HttpConfiguration(ipv4"0.0.0.0", port"8080")
 

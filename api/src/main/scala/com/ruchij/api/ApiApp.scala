@@ -71,7 +71,7 @@ object ApiApp extends IOApp {
     val redisKeyValueStore = RedisKeyValueStore(redisCommands)
 
     val applicationHealthService: ApplicationHealthService[F] =
-      ApplicationHealthServiceImpl[F](client, serviceConfiguration.buildInformation)
+      ApplicationHealthServiceImpl[F](client, redisKeyValueStore, serviceConfiguration.buildInformation)
 
     val passwordHashingService: PasswordHashingService[F] = BCryptPasswordHashingService[F]
 

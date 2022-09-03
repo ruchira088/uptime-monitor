@@ -11,8 +11,9 @@ import org.scalatest.matchers.must.Matchers
 import pureconfig.ConfigSource
 import com.ruchij.migration.config.DatabaseConfiguration.apply
 import com.ruchij.migration.config.DatabaseConfiguration
-import scala.concurrent.duration.FiniteDuration
-import java.util.concurrent.TimeUnit
+
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.language.postfixOps
 
 class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
 
@@ -72,7 +73,7 @@ class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
           serviceConfiguration.redisConfiguration mustBe RedisConfiguration(host"localhost", port"6379", Some(Password("my-password")))
           serviceConfiguration.redisConfiguration.url mustBe "redis://my-password@localhost:6379"
 
-          serviceConfiguration.authenticationConfiguration mustBe AuthenticationConfiguration(FiniteDuration(7, TimeUnit.DAYS))
+          serviceConfiguration.authenticationConfiguration mustBe AuthenticationConfiguration(7 days)
 
           serviceConfiguration.buildInformation mustBe
             BuildInformation(Some("my-branch"), None, Some(DateTime(2021, 7, 31, 10, 10, 0, 0, DateTimeZone.UTC)))

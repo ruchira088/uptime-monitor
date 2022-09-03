@@ -79,8 +79,8 @@ lazy val migration =
       libraryDependencies ++= Seq(scalaTest).map(_ % Test)
     )
 
-lazy val appStack =
-  (project in file("./app-stack"))
+lazy val applicationStack =
+  (project in file("./application-stack"))
     .settings(
       name := "application-stack"
     )
