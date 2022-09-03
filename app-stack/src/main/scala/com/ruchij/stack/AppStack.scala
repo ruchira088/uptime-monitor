@@ -5,7 +5,7 @@ import cats.effect.kernel.{Async, Resource}
 import cats.effect.kernel.Resource.apply
 import com.comcast.ip4s.{ipv4, port}
 import com.ruchij.api.ApiApp
-import com.ruchij.api.config.{BuildInformation, HttpConfiguration, ServiceConfiguration}
+import com.ruchij.api.config.{BuildInformation, HttpConfiguration, RedisConfiguration, ServiceConfiguration}
 import com.ruchij.api.types.JodaClock
 import com.ruchij.migration.{Application, MigrationApp}
 import com.ruchij.migration.config.DatabaseConfiguration
@@ -13,6 +13,9 @@ import org.http4s.HttpApp
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
 import pureconfig.{ConfigObjectSource, ConfigSource}
+import com.ruchij.api.config.AuthenticationConfiguration
+import scala.concurrent.duration.FiniteDuration
+import java.util.concurrent.TimeUnit
 
 object AppStack extends IOApp {
 
@@ -22,6 +25,10 @@ object AppStack extends IOApp {
       "",
       ""
     )
+    
+  val RedisConfig: RedisConfiguration = ???
+
+  val AuthenticationConfig = AuthenticationConfiguration(FiniteDuration(7, TimeUnit.DAYS))
 
   val HttpConfig: HttpConfiguration = HttpConfiguration(ipv4"0.0.0.0", port"8080")
 
@@ -35,7 +42,7 @@ object AppStack extends IOApp {
 
   private def api[F[_]: Async: JodaClock]: Resource[F, Server] =
     ApiApp
-      .httpApp[F](ServiceConfiguration(DatabaseConfig, HttpConfig, BuildInfo))
+      .httpApp[F](ServiceConfiguration(DatabaseConfig, RedisConfig, AuthenticationConfig, HttpConfig, BuildInfo))
       .flatMap { httpApp =>
         EmberServerBuilder
           .default[F]

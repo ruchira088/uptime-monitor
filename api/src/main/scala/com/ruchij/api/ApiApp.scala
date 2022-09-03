@@ -29,6 +29,9 @@ import org.http4s.client.Client
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.ember.server.EmberServerBuilder
 import pureconfig.ConfigSource
+import dev.profunktor.redis4cats.RedisCommands
+import com.ruchij.api.kvstore.RedisKeyValueStore
+import com.ruchij.api.services.authentication.AuthenticationServiceImpl
 
 object ApiApp extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
@@ -53,15 +56,19 @@ object ApiApp extends IOApp {
   def httpApp[F[_]: Async: JodaClock](serviceConfiguration: ServiceConfiguration): Resource[F, HttpApp[F]] =
     for {
       hikariTransactor <- DoobieTransactor.create(serviceConfiguration.databaseConfiguration)
+      redisCommands <- RedisKeyValueStore.create(serviceConfiguration.redisConfiguration)
       client <- EmberClientBuilder.default[F].build
-    } yield httpApp(hikariTransactor, client, serviceConfiguration)
+    } yield httpApp(hikariTransactor, redisCommands, client, serviceConfiguration)
 
   def httpApp[F[_]: Async: JodaClock](
     hikariTransactor: HikariTransactor[F],
+    redisCommands: RedisCommands[F, String, String],
     client: Client[F],
     serviceConfiguration: ServiceConfiguration
   ): HttpApp[F] = {
     given FunctionK[ConnectionIO, F] = hikariTransactor.trans
+
+    val redisKeyValueStore = RedisKeyValueStore(redisCommands)
 
     val applicationHealthService: ApplicationHealthService[F] =
       ApplicationHealthServiceImpl[F](client, serviceConfiguration.buildInformation)
@@ -71,6 +78,15 @@ object ApiApp extends IOApp {
     val userService: UserService[F] =
       UserServiceImpl[F, ConnectionIO](passwordHashingService, DoobieUserDao, DoobieCredentialsDao)
 
-    Routes(userService, ???, applicationHealthService)
+    val authenticationService =
+      AuthenticationServiceImpl(
+        redisKeyValueStore, 
+        passwordHashingService, 
+        DoobieUserDao, 
+        DoobieCredentialsDao, 
+        serviceConfiguration.authenticationConfiguration
+      )
+
+    Routes(userService, authenticationService, applicationHealthService)
   }
 }

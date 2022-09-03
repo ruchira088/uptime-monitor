@@ -1,7 +1,9 @@
 package com.ruchij.api.config
 
 import cats.effect.IO
-import com.comcast.ip4s.{ipv4, port}
+import com.comcast.ip4s.Literals.host
+import com.comcast.ip4s.{host, ipv4, port}
+import com.ruchij.api.dao.user.models.Passwords.Password
 import com.ruchij.api.test.utils.IOUtils.{error, runIO}
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -9,6 +11,8 @@ import org.scalatest.matchers.must.Matchers
 import pureconfig.ConfigSource
 import com.ruchij.migration.config.DatabaseConfiguration.apply
 import com.ruchij.migration.config.DatabaseConfiguration
+import scala.concurrent.duration.FiniteDuration
+import java.util.concurrent.TimeUnit
 
 class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
 
@@ -25,6 +29,21 @@ class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
 
             password = ""
             password = $${?DATABASE_PASSWORD}
+          }
+
+          redis-configuration {
+            host = "localhost"
+            host = $${?REDIS_HOST}
+
+            port = 6379
+            port = $${?REDIS_PORT}
+
+            password = "my-password"
+            password = $${?REDIS_PASSWORD}
+          }
+
+          authentication-configuration {
+            session-duration = "7d"
           }
 
           http-configuration {
@@ -49,10 +68,18 @@ class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
       serviceConfiguration =>
         IO.delay {
           serviceConfiguration.httpConfiguration mustBe HttpConfiguration(ipv4"127.0.0.1", port"80")
+
+          serviceConfiguration.redisConfiguration mustBe RedisConfiguration(host"localhost", port"6379", Some(Password("my-password")))
+          serviceConfiguration.redisConfiguration.url mustBe "redis://my-password@localhost:6379"
+
+          serviceConfiguration.authenticationConfiguration mustBe AuthenticationConfiguration(FiniteDuration(7, TimeUnit.DAYS))
+
           serviceConfiguration.buildInformation mustBe
             BuildInformation(Some("my-branch"), None, Some(DateTime(2021, 7, 31, 10, 10, 0, 0, DateTimeZone.UTC)))
+
           serviceConfiguration.databaseConfiguration mustBe
             DatabaseConfiguration("jdbc:h2:mem:uptime-monitor;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false", "", "")
+
         }
     }
   }
