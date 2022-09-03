@@ -1,7 +1,7 @@
 CREATE TABLE http_request_body (
-    id VARCHAR(48),
+    id VARCHAR(63),
     created_at TIMESTAMP NOT NULL,
-    http_endpoint_id VARCHAR(48) UNIQUE NOT NULL,
+    http_endpoint_id VARCHAR(63) UNIQUE NOT NULL,
     content_type VARCHAR(63) NOT NULL,
     body VARCHAR(4095) NOT NULL,
 

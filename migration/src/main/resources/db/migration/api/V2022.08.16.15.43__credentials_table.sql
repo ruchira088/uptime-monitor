@@ -1,5 +1,5 @@
 CREATE TABLE user_credentials (
-    user_id VARCHAR(36),
+    user_id VARCHAR(63),
     created_at TIMESTAMP NOT NULL,
     hashed_password VARCHAR(127) NOT NULL,
 

@@ -1,5 +1,5 @@
 CREATE TABLE http_endpoint (
-    id VARCHAR(48),
+    id VARCHAR(63),
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     http_method VARCHAR(8) NOT NULL,

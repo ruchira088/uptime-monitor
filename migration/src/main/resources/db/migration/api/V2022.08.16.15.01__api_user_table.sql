@@ -1,5 +1,5 @@
 CREATE TABLE api_user (
-    id VARCHAR(48),
+    id VARCHAR(63),
     created_at TIMESTAMP NOT NULL,
     email VARCHAR(128) UNIQUE NOT NULL,
     first_name VARCHAR(64) NOT NULL,
