@@ -5,7 +5,7 @@ import cats.arrow.FunctionK
 import cats.data.{Kleisli, NonEmptyList}
 import cats.effect.Sync
 import cats.implicits.*
-import com.ruchij.api.exceptions.{ResourceConflictException, ResourceNotFoundException}
+import com.ruchij.api.exceptions.{AuthenticationException, ResourceConflictException, ResourceNotFoundException, ValidationException}
 import com.ruchij.api.types.Logger
 import com.ruchij.api.web.responses.ErrorResponse
 import io.circe.DecodingFailure
@@ -31,6 +31,10 @@ object ExceptionHandler {
 
     case _: ResourceConflictException => Status.Conflict
 
+    case _: AuthenticationException => Status.Unauthorized
+
+    case _: ValidationException => Status.BadRequest
+
     case _ => Status.InternalServerError
   }
 
@@ -53,6 +57,8 @@ object ExceptionHandler {
 
   private def errorResponseMapper[F[_]](throwable: Throwable)(response: Response[F]): Response[F] =
     throwable match {
+      case _: AuthenticationException => response.removeCookie(UserAuthenticator.AuthenticationCookieName)
+
       case _ => response
     }
 

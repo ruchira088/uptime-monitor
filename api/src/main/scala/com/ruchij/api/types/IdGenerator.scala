@@ -22,7 +22,7 @@ object IdGenerator {
         def apply[A](using idPrefix: IdPrefix[A]): IdPrefix[A] = idPrefix
 
         given [A](using classTag: ClassTag[A]): IdPrefix[A] with {
-            override val value: String = classTag.runtimeClass.getSimpleName().toLowerCase()
+            override val value: String = classTag.runtimeClass.getSimpleName().toLowerCase() + "-"
         }
     }
 
@@ -31,6 +31,6 @@ object IdGenerator {
     given [F[_]: Sync]: IdGenerator[F] with {
         override def generate[A: IdPrefix]: F[ID[A]] = 
             Sync[F].delay(UUID.randomUUID().toString())
-                .map { uuid => ID.create[A](s"${IdPrefix[A].value}-$uuid") }
+                .map { uuid => ID.create[A](s"${IdPrefix[A].value}$uuid") }
     }
 }

@@ -35,7 +35,7 @@ object AuthenticationRoutes {
           user <- authenticationService.logout(authenticationSecret)
           response <- Ok(user)
         }
-        yield response
+        yield response.removeCookie(UserAuthenticator.AuthenticationCookieName)
 
     } <+>
       UserAuthenticator[F](authenticationService).apply {
