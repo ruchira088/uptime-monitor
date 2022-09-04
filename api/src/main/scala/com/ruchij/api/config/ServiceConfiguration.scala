@@ -9,7 +9,7 @@ import pureconfig.error.ConfigReaderException
 import pureconfig.generic.derivation.default.*
 import pureconfig.{ConfigObjectSource, ConfigReader}
 
-case class ServiceConfiguration(
+final case class ServiceConfiguration(
   databaseConfiguration: DatabaseConfiguration,
   redisConfiguration: RedisConfiguration,
   authenticationConfiguration: AuthenticationConfiguration,

@@ -7,7 +7,7 @@ import pureconfig.ConfigReader
 import com.ruchij.migration.Application
 import pureconfig.ConfigCursor
 
-case class MigrationConfiguration(databaseConfiguration: DatabaseConfiguration, application: Option[Application]) derives ConfigReader
+final case class MigrationConfiguration(databaseConfiguration: DatabaseConfiguration, application: Option[Application]) derives ConfigReader
 
 object MigrationConfiguration {
     def load(configObjectSource: ConfigObjectSource): Either[ConfigReaderException[MigrationConfiguration], MigrationConfiguration] =
