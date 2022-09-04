@@ -21,7 +21,7 @@ object AuthenticationRoutes {
     import dsl._  
 
     HttpRoutes.of[F] {
-      case request @ GET -> Root / "login" =>
+      case request @ POST -> Root / "login" =>
         for {
           userLoginRequest <- request.as[UserLoginRequest]
           authenticationToken <- authenticationService.login(userLoginRequest.email, userLoginRequest.password)
@@ -29,7 +29,7 @@ object AuthenticationRoutes {
         }
         yield response.addCookie(UserAuthenticator.AuthenticationCookieName, authenticationToken.secret.toString)
 
-      case request @ GET -> Root / "logout" =>
+      case request @ DELETE -> Root / "logout" =>
         for {
           authenticationSecret <- UserAuthenticator.authenticationSecret(request).toType[F, Throwable]
           user <- authenticationService.logout(authenticationSecret)

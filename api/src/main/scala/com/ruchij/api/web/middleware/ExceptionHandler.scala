@@ -5,7 +5,7 @@ import cats.arrow.FunctionK
 import cats.data.{Kleisli, NonEmptyList}
 import cats.effect.Sync
 import cats.implicits.*
-import com.ruchij.api.exceptions.ResourceNotFoundException
+import com.ruchij.api.exceptions.{ResourceConflictException, ResourceNotFoundException}
 import com.ruchij.api.types.Logger
 import com.ruchij.api.web.responses.ErrorResponse
 import io.circe.DecodingFailure
@@ -15,22 +15,6 @@ import org.http4s.dsl.impl.EntityResponseGenerator
 import org.http4s.{HttpApp, Request, Response, Status}
 
 object ExceptionHandler {
-  val throwableStatusMapper: Throwable => Status = {
-    case _: ResourceNotFoundException => Status.NotFound
-
-    case _ => Status.InternalServerError
-  }
-  val throwableResponseBody: Throwable => ErrorResponse = {
-    case decodingFailure: DecodingFailure =>
-      ErrorResponse {
-        NonEmptyList.one {
-          Show[DecodingFailure].show(decodingFailure)
-        }
-      }
-
-    case throwable =>
-      Option(throwable.getCause).fold(ErrorResponse(NonEmptyList.of(throwable.getMessage)))(throwableResponseBody)
-  }
   private val logger = Logger[ExceptionHandler.type]
 
   def apply[F[_]: Sync](httpApp: HttpApp[F]): HttpApp[F] =
@@ -42,17 +26,37 @@ object ExceptionHandler {
       }
     }
 
-  def errorLogger[F[_]: Sync](response: Response[F], throwable: Throwable): F[Unit] =
+  private val throwableStatusMapper: Throwable => Status = {
+    case _: ResourceNotFoundException => Status.NotFound
+
+    case _: ResourceConflictException => Status.Conflict
+
+    case _ => Status.InternalServerError
+  }
+
+  private val throwableResponseBody: Throwable => ErrorResponse = {
+    case decodingFailure: DecodingFailure =>
+      ErrorResponse {
+        NonEmptyList.one {
+          Show[DecodingFailure].show(decodingFailure)
+        }
+      }
+
+    case throwable =>
+      Option(throwable.getCause).fold(ErrorResponse(NonEmptyList.of(throwable.getMessage)))(throwableResponseBody)
+  }
+
+  private def errorLogger[F[_]: Sync](response: Response[F], throwable: Throwable): F[Unit] =
     if (response.status >= Status.InternalServerError)
       logger.error(s"${response.status.code} status error code was returned.", throwable)
     else logger.warn(throwable.getMessage)
 
-  def errorResponseMapper[F[_]](throwable: Throwable)(response: Response[F]): Response[F] =
+  private def errorResponseMapper[F[_]](throwable: Throwable)(response: Response[F]): Response[F] =
     throwable match {
       case _ => response
     }
 
-  def entityResponseGenerator[F[_]](throwable: Throwable): EntityResponseGenerator[F, F] =
+  private def entityResponseGenerator[F[_]](throwable: Throwable): EntityResponseGenerator[F, F] =
     new EntityResponseGenerator[F, F] {
       override def status: Status = throwableStatusMapper(throwable)
 
