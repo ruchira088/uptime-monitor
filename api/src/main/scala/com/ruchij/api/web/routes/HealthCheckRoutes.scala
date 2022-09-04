@@ -13,6 +13,7 @@ import com.ruchij.api.services.healthcheck.models.HealthCheck
 import com.ruchij.api.web.middleware.UserAuthenticator
 import com.ruchij.api.web.requests.CreateHealthCheckRequest
 import com.ruchij.api.types.FunctionKTypes.{*, given}
+import com.ruchij.api.web.responses.HealthCheckResponse
 import org.http4s.{ContextRoutes, HttpRoutes}
 import io.circe.generic.auto.*
 import org.http4s.dsl.Http4sDsl
@@ -38,10 +39,10 @@ object HealthCheckRoutes {
                 method = createHealthCheckRequest.method,
                 url = createHealthCheckRequest.url,
                 headers = createHealthCheckRequest.headers,
-                body = None
+                maybeBody = createHealthCheckRequest.body
               )
 
-            response <- Created(healthCheck)
+            response <- Created(HealthCheckResponse.from(healthCheck))
           }
           yield response
 

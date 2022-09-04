@@ -45,7 +45,7 @@ class HealthCheckServiceImpl[F[_]: Sync: JodaClock: IdGenerator, G[_]: MonadThro
     method: Method,
     url: Uri,
     headers: List[Header.Raw],
-    body: Option[Seq[Byte]]
+    maybeBody: Option[String]
   ): F[HealthCheck] =
     for {
       timestamp <- JodaClock[F].timestamp
@@ -79,7 +79,7 @@ class HealthCheckServiceImpl[F[_]: Sync: JodaClock: IdGenerator, G[_]: MonadThro
         }
 
       httpRequestBody <-
-        body.map { data =>
+        maybeBody.map { data =>
           IdGenerator[F]
             .generate[HttpRequestBody]
             .map { httpRequestBodyId =>

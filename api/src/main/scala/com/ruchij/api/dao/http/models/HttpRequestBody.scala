@@ -10,5 +10,5 @@ final case class HttpRequestBody(
   createdAt: DateTime,
   httpEndpointId: ID[HttpEndpoint],
   contentType: `Content-Type`,
-  body: Seq[Byte]
+  body: String
 )

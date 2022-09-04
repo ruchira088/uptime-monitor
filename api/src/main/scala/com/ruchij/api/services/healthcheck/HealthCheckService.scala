@@ -16,7 +16,7 @@ trait HealthCheckService[F[_]] {
     method: Method,
     url: Uri,
     headers: List[Header.Raw],
-    body: Option[Seq[Byte]]
+    maybeBody: Option[String]
   ): F[HealthCheck]
 
   def getById(id: ID[HealthCheckDetails], maybeUserId: Option[ID[User]]): F[HealthCheck]

@@ -7,11 +7,11 @@ import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator
 
 object DoobieHttpHeaderDao extends HttpHeaderDao[ConnectionIO] {
-  private val SelectQuery = sql"SELECT id, created_at, http_endpoint_id, header_nae, header_value FROM http_header"
+  private val SelectQuery = sql"SELECT id, created_at, http_endpoint_id, header_name, header_value FROM http_header"
 
   override def insert(httpHeader: HttpHeader): ConnectionIO[Int] =
     sql"""
-        INSERT INTO http_header (id, created_at, http_endpoint_id, header_nae, header_value)
+        INSERT INTO http_header (id, created_at, http_endpoint_id, header_name, header_value)
           VALUES (
             ${httpHeader.id},
             ${httpHeader.createdAt},
