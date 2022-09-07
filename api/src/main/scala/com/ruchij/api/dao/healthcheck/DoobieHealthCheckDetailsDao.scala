@@ -22,13 +22,22 @@ object DoobieHealthCheckDetailsDao extends HealthCheckDetailsDao[ConnectionIO] {
             ${healthCheckDetails.userId},
             ${healthCheckDetails.httpEndpointId}
           )
-    """
-      .update
-      .run
+    """.update.run
 
-  override def findById(id: ID[HealthCheckDetails], maybeUserId: Option[ID[User]]): ConnectionIO[Option[HealthCheckDetails]] =
-    (SelectQuery ++ fr"WHERE id = $id" ++ orOpt(maybeUserId.map(userId => fr"user_id = $userId"))).query[HealthCheckDetails].option
+  override def findById(
+    id: ID[HealthCheckDetails],
+    maybeUserId: Option[ID[User]]
+  ): ConnectionIO[Option[HealthCheckDetails]] =
+    (SelectQuery ++ fr"WHERE id = $id" ++ orOpt(maybeUserId.map(userId => fr"user_id = $userId")))
+      .query[HealthCheckDetails]
+      .option
 
   override def findByUserId(id: ID[User]): ConnectionIO[Seq[HealthCheckDetails]] =
     (SelectQuery ++ fr"WHERE user_id = $id").query[HealthCheckDetails].to[Seq]
+
+  override def update(
+    id: ID[HealthCheckDetails],
+    maybeName: Option[String],
+    maybeDescription: Option[String]
+  ): ConnectionIO[Option[HealthCheckDetails]] = ???
 }

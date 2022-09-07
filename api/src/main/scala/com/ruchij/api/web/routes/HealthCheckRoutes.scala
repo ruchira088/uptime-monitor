@@ -53,6 +53,12 @@ object HealthCheckRoutes {
             response <- Ok(healthCheck)
           }
           yield response
+
+        case PATCH -> Root / "details" / id as user =>
+          for {
+            healthCheckDetails <- ID.parse[HealthCheckDetails](id).toType[F, Throwable]
+          }
+          yield ???
       }
     }
   }

@@ -22,4 +22,6 @@ trait HealthCheckService[F[_]] {
   def getById(id: ID[HealthCheckDetails], maybeUserId: Option[ID[User]]): F[HealthCheck]
   
   def getByUserId(userId: ID[User]): F[Seq[HealthCheck]]
+
+  def updateHealthCheckDetails(id: ID[HealthCheckDetails], maybeName: Option[String], maybeDescription: Option[String]): F[HealthCheckDetails]
 }

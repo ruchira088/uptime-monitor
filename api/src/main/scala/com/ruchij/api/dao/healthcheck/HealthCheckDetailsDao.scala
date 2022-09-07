@@ -10,4 +10,10 @@ trait HealthCheckDetailsDao[F[_]] {
   def findById(id: ID[HealthCheckDetails], maybeUserId: Option[ID[User]]): F[Option[HealthCheckDetails]]
 
   def findByUserId(id: ID[User]): F[Seq[HealthCheckDetails]]
+
+  def update(
+    id: ID[HealthCheckDetails],
+    maybeName: Option[String],
+    maybeDescription: Option[String]
+  ): F[Option[HealthCheckDetails]]
 }

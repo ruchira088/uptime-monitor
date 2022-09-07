@@ -135,4 +135,6 @@ class HealthCheckServiceImpl[F[_]: Sync: JodaClock: IdGenerator, G[_]: MonadThro
       maybeRequestBody <- OptionT.liftF(httpRequestBodyDao.findByHttpEndpointId(httpEndpoint.id))
     }
     yield HealthCheck(healthCheckDetails, httpEndpoint, headers, maybeRequestBody)
+
+  override def updateHealthCheckDetails(id: ID[HealthCheckDetails], maybeName: Option[String], maybeDescription: Option[String]): F[HealthCheckDetails] = ???
 }
