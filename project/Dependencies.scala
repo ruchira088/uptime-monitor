@@ -27,7 +27,7 @@ object Dependencies {
 
   lazy val h2 = "com.h2database" % "h2" % "2.1.214"
 
-  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.2.2"
+  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.3.0"
 
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.3.14"
 
@@ -41,7 +41,7 @@ object Dependencies {
 
   lazy val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.1"
 
-  lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.4.0"
+  lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.4.1"
 
   lazy val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
 
