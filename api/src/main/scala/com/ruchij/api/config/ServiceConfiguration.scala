@@ -1,7 +1,6 @@
 package com.ruchij.api.config
 
 import cats.ApplicativeError
-import com.ruchij.api.config.BuildInformation
 import com.ruchij.api.config.ConfigReaders.given
 import com.ruchij.api.types.FunctionKTypes.{*, given}
 import com.ruchij.migration.config.DatabaseConfiguration
@@ -13,8 +12,7 @@ final case class ServiceConfiguration(
   databaseConfiguration: DatabaseConfiguration,
   redisConfiguration: RedisConfiguration,
   authenticationConfiguration: AuthenticationConfiguration,
-  httpConfiguration: HttpConfiguration,
-  buildInformation: BuildInformation
+  httpConfiguration: HttpConfiguration
 ) derives ConfigReader
 
 object ServiceConfiguration {

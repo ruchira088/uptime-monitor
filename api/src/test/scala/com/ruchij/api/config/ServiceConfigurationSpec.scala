@@ -54,14 +54,6 @@ class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
             port = 80
             port = $${?HTTP_PORT}
           }
-
-          build-information {
-            git-branch = "my-branch"
-
-            git-commit = $${?GIT_COMMIT}
-
-            build-timestamp = "2021-07-31T10:10:00.000Z"
-          }
         """
       }
 
@@ -74,9 +66,6 @@ class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
           serviceConfiguration.redisConfiguration.url mustBe "redis://my-password@localhost:6379"
 
           serviceConfiguration.authenticationConfiguration mustBe AuthenticationConfiguration(7 days)
-
-          serviceConfiguration.buildInformation mustBe
-            BuildInformation(Some("my-branch"), None, Some(DateTime(2021, 7, 31, 10, 10, 0, 0, DateTimeZone.UTC)))
 
           serviceConfiguration.databaseConfiguration mustBe
             DatabaseConfiguration("jdbc:h2:mem:uptime-monitor;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false", "", "")
@@ -95,16 +84,19 @@ class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
             password = ""
           }
 
-          http-configuration {
-            host = "0.0.0.0"
-
-            port = 8080
+          redis-configuration {
+            host = "localhost"
+            port = 6379
+            password = "my-password"
           }
 
-          build-information {
-            git-branch = "my-branch"
+          authentication-configuration {
+            session-duration = "7d"
+          }
 
-            build-timestamp = "invalid-date"
+          http-configuration {
+            host = "0.0.0.0"
+            port = my-invalid-port
           }
         """
       }
@@ -112,7 +104,7 @@ class ServiceConfigurationSpec extends AnyFlatSpec with Matchers {
     ServiceConfiguration.parse[IO](configObjectSource).error
       .flatMap { throwable =>
         IO.delay {
-          throwable.getMessage must include("Cannot convert 'invalid-date' to DateTime: Invalid format: \"invalid-date\"")
+          throwable.getMessage must include("Cannot convert 'my-invalid-port' to com.comcast.ip4s.Port")
         }
       }
   }

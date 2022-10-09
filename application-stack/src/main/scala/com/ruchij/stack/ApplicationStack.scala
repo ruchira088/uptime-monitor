@@ -5,7 +5,7 @@ import cats.effect.kernel.{Async, Resource}
 import cats.effect.kernel.Resource.apply
 import com.comcast.ip4s.{ipv4, port}
 import com.ruchij.api.ApiApp
-import com.ruchij.api.config.{BuildInformation, HttpConfiguration, RedisConfiguration, ServiceConfiguration}
+import com.ruchij.api.config.{HttpConfiguration, RedisConfiguration, ServiceConfiguration}
 import com.ruchij.api.types.JodaClock
 import com.ruchij.migration.{Application, MigrationApp}
 import com.ruchij.migration.config.DatabaseConfiguration
@@ -33,8 +33,6 @@ object ApplicationStack extends IOApp {
 
   val HttpConfig: HttpConfiguration = HttpConfiguration(ipv4"0.0.0.0", port"8080")
 
-  val BuildInfo: BuildInformation = BuildInformation(Some("my-branch"), Some("my-commit"), None)
-
   override def run(args: List[String]): IO[ExitCode] =
     for {
       _ <- MigrationApp.migrate[IO](DatabaseConfig, Application.Api)
@@ -43,7 +41,7 @@ object ApplicationStack extends IOApp {
 
   private def api[F[_]: Async: JodaClock]: Resource[F, Server] =
     ApiApp
-      .httpApp[F](ServiceConfiguration(DatabaseConfig, RedisConfig, AuthenticationConfig, HttpConfig, BuildInfo))
+      .httpApp[F](ServiceConfiguration(DatabaseConfig, RedisConfig, AuthenticationConfig, HttpConfig))
       .flatMap { httpApp =>
         EmberServerBuilder
           .default[F]

@@ -4,7 +4,9 @@ import sbtrelease.ReleaseStateTransformations._
 import sbtrelease.Utilities.stateW
 
 import java.awt.Desktop
-import scala.sys.process.ProcessBuilder
+import java.time.Instant
+import scala.sys.process._
+import scala.util.Try
 
 val ReleaseBranch = "dev"
 val ProductionBranch = "main"
@@ -26,7 +28,15 @@ lazy val api =
     .enablePlugins(BuildInfoPlugin, JavaAppPackaging)
     .settings(
       name := "uptime-monitor-api",
-      buildInfoKeys := Seq[BuildInfoKey](name, organization, version, scalaVersion, sbtVersion),
+      buildInfoKeys := Seq[BuildInfoKey](
+        name, organization,
+        version,
+        scalaVersion,
+        sbtVersion,
+        buildTimestamp,
+        gitBranch,
+        gitCommit
+      ),
       buildInfoPackage := "com.eed3si9n.ruchij",
       topLevelDirectory := None,
       Universal / javaOptions ++= Seq("-Dlogback.configurationFile=/opt/data/logback.xml"),
@@ -151,6 +161,16 @@ viewCoverageResults := {
   Desktop.getDesktop.browse(coverageResults.toUri)
 }
 
-addCommandAlias("cleanCompile", "; clean; compile")
-addCommandAlias("cleanTest", "; clean; test")
-addCommandAlias("testWithCoverage", "; clean; coverage; test; coverageAggregate; viewCoverageResults")
+lazy val buildTimestamp = BuildInfoKey.action("buildTimestamp") { Instant.now() }
+lazy val gitBranch = BuildInfoKey.action("gitBranch") { runGitCommand("git rev-parse --abbrev-ref HEAD") }
+lazy val gitCommit =  BuildInfoKey.action("gitCommit") { runGitCommand("git rev-parse --short HEAD") }
+
+def runGitCommand(command: String): Option[String] = {
+  val gitFolder = new File(".git")
+
+  if (gitFolder.exists()) Try(command !!).toOption.map(_.trim).filter(_.nonEmpty) else None
+}
+
+addCommandAlias("cleanCompile", "clean; compile;")
+addCommandAlias("cleanTest", "clean; test;")
+addCommandAlias("testWithCoverage", "clean; coverageOn; test; coverageAggregate; coverageOff; viewCoverageResults;")

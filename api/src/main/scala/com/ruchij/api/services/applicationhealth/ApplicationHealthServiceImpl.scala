@@ -3,7 +3,6 @@ package com.ruchij.api.services.applicationhealth
 import cats.effect.{Async, Clock, Concurrent, Sync}
 import cats.implicits.*
 import cats.~>
-import com.ruchij.api.config.BuildInformation
 import com.ruchij.api.services.applicationhealth.models.{HealthStatus, ServiceHealthStatus, ServiceInformation}
 import com.ruchij.api.types.JodaClock
 import doobie.ConnectionIO
@@ -22,8 +21,7 @@ import cats.effect.kernel.Fiber
 
 class ApplicationHealthServiceImpl[F[_]: JodaClock: Async: IdGenerator](
   client: Client[F],
-  keyValueStore: KeyValueStore[F],
-  buildInformation: BuildInformation
+  keyValueStore: KeyValueStore[F]
 )(using transaction: ConnectionIO ~> F)
     extends ApplicationHealthService[F] {
   private val http4sClientDsl = new Http4sClientDsl[F] {}
@@ -32,7 +30,7 @@ class ApplicationHealthServiceImpl[F[_]: JodaClock: Async: IdGenerator](
 
   override val serviceInformation: F[ServiceInformation] =
     JodaClock[F].timestamp
-      .flatMap(timestamp => ServiceInformation.create(timestamp, buildInformation))
+      .flatMap(timestamp => ServiceInformation.create(timestamp))
 
   private val databaseHealthCheck: F[HealthStatus] =
     transaction(sql"SELECT 1".query[Int].unique)

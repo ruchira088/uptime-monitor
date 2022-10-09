@@ -2,8 +2,8 @@ import sbt._
 
 object Dependencies {
   val ScalaVersion = "3.2.0"
-  val Http4sVersion = "0.23.15"
-  val CirceVersion = "0.14.2"
+  val Http4sVersion = "0.23.16"
+  val CirceVersion = "0.14.3"
 
   lazy val http4sDsl = "org.http4s" %% "http4s-dsl" % Http4sVersion
 
@@ -27,7 +27,7 @@ object Dependencies {
 
   lazy val h2 = "com.h2database" % "h2" % "2.1.214"
 
-  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.3.0"
+  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.4.0"
 
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.3.14"
 
@@ -37,17 +37,17 @@ object Dependencies {
 
   lazy val embeddedRedis = "com.github.kstyrc" % "embedded-redis" % "0.6"
 
-  lazy val jodaTime = "joda-time" % "joda-time" % "2.11.1"
+  lazy val jodaTime = "joda-time" % "joda-time" % "2.11.2"
 
   lazy val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.1"
 
-  lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.4.1"
+  lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.4.3"
 
   lazy val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5"
 
-  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.13"
+  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.2.14"
 
-  lazy val scalaTestPlusMockito = "org.scalatestplus" %% "mockito-4-6" % "3.2.13.0"
+  lazy val scalaTestPlusMockito = "org.scalatestplus" %% "mockito-4-6" % "3.2.14.0"
 
   lazy val pegdown = "org.pegdown" % "pegdown" % "1.6.0"
 }
