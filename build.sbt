@@ -152,15 +152,6 @@ releaseProcess := Seq(
   pushChanges
 )
 
-val viewCoverageResults = taskKey[Unit]("Opens the coverage result in the default browser")
-
-viewCoverageResults := {
-  val coverageResults =
-    target.value.toPath.resolve(s"scala-${scalaBinaryVersion.value}/scoverage-report/index.html")
-
-  Desktop.getDesktop.browse(coverageResults.toUri)
-}
-
 lazy val buildTimestamp = BuildInfoKey.action("buildTimestamp") { Instant.now() }
 lazy val gitBranch = BuildInfoKey.action("gitBranch") { runGitCommand("git rev-parse --abbrev-ref HEAD") }
 lazy val gitCommit =  BuildInfoKey.action("gitCommit") { runGitCommand("git rev-parse --short HEAD") }
@@ -173,4 +164,3 @@ def runGitCommand(command: String): Option[String] = {
 
 addCommandAlias("cleanCompile", "clean; compile;")
 addCommandAlias("cleanTest", "clean; test;")
-addCommandAlias("testWithCoverage", "clean; coverageOn; test; coverageAggregate; coverageOff; viewCoverageResults;")
