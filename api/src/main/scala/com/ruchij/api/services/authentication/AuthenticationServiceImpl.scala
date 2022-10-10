@@ -1,8 +1,13 @@
 package com.ruchij.api.services.authentication
 
+import cats.Applicative
+import cats.ApplicativeError
+import cats.MonadThrow
+import cats.Semigroup
 import cats.data.OptionT
 import cats.implicits.*
-import cats.{Applicative, ApplicativeError, MonadThrow, Semigroup, ~>}
+import cats.syntax.validated
+import cats.~>
 import com.ruchij.api.circe.Decoders.given
 import com.ruchij.api.circe.Encoders.given
 import com.ruchij.api.config.AuthenticationConfiguration
@@ -11,20 +16,24 @@ import com.ruchij.api.dao.user.UserDao
 import com.ruchij.api.dao.user.models.Emails.Email
 import com.ruchij.api.dao.user.models.Passwords.Password
 import com.ruchij.api.dao.user.models.User
-import com.ruchij.api.exceptions.{AuthenticationException, ResourceNotFoundException}
-import com.ruchij.api.kvstore.{KeyValueStore, Keyspace, KeyspacedKeyValueStore}
-import com.ruchij.api.services.authentication.AuthenticationServiceImpl.given
+import com.ruchij.api.exceptions.AuthenticationException
+import com.ruchij.api.exceptions.ResourceNotFoundException
+import com.ruchij.api.kvstore.KeyValueStore
+import com.ruchij.api.kvstore.Keyspace
+import com.ruchij.api.kvstore.KeyspacedKeyValueStore
 import com.ruchij.api.services.authentication.AuthenticationServiceImpl.Session
+import com.ruchij.api.services.authentication.AuthenticationServiceImpl.given
 import com.ruchij.api.services.authentication.models.AuthenticationToken
-import com.ruchij.api.services.authentication.models.AuthenticationToken.{Secret, SecretGenerator}
+import com.ruchij.api.services.authentication.models.AuthenticationToken.Secret
+import com.ruchij.api.services.authentication.models.AuthenticationToken.SecretGenerator
 import com.ruchij.api.services.hash.PasswordHashingService
+import com.ruchij.api.types.IdGenerator
 import com.ruchij.api.types.IdGenerator.IdPrefix
-import com.ruchij.api.types.{IdGenerator, JodaClock}
+import com.ruchij.api.types.JodaClock
 import com.ruchij.api.types.RandomGenerator
 import io.circe.generic.auto.*
 
 import scala.concurrent.duration.FiniteDuration
-import cats.syntax.validated
 
 class AuthenticationServiceImpl[F[_]: MonadThrow: JodaClock: SecretGenerator, G[_]: MonadThrow](
   keyValueStore: KeyValueStore[F],
