@@ -6,7 +6,7 @@ import cats.effect.kernel.Sync
 import com.ruchij.api.dao.user.models.User
 import com.ruchij.api.exceptions.AuthenticationException
 import com.ruchij.api.services.authentication.AuthenticationService
-import com.ruchij.api.services.authentication.models.AuthenticationToken.AuthenticationSecret
+import com.ruchij.api.services.authentication.models.AuthenticationToken.Secret
 import com.ruchij.api.types.FunctionKTypes.{given, *}
 import org.http4s.Credentials.Token
 import org.http4s.{ContextRequest, Request, Response}
@@ -26,18 +26,18 @@ object UserAuthenticator {
           }
       }
 
-  def authenticationSecret(request: Request[_]): Either[AuthenticationException, AuthenticationSecret] =
+  def authenticationSecret(request: Request[_]): Either[AuthenticationException, Secret] =
     token(request).orElse(authenticationCookie(request))
       .toRight(AuthenticationException("Authentication secret not found in Authorization header or cookie"))
 
-  private def token(request: Request[_]): Option[AuthenticationSecret] =
+  private def token(request: Request[_]): Option[Secret] =
     request.headers
       .get[Authorization]
       .map(_.credentials)
-      .collect { case Token(_, token) => AuthenticationSecret(token) }
+      .collect { case Token(_, token) => Secret(token) }
 
-  private def authenticationCookie(request: Request[_]): Option[AuthenticationSecret] =
+  private def authenticationCookie(request: Request[_]): Option[Secret] =
     request.cookies
       .find(_.name == AuthenticationCookieName)
-      .map(cookie => AuthenticationSecret(cookie.content))
+      .map(cookie => Secret(cookie.content))
 }

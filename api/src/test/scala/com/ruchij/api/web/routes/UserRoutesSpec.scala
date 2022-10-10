@@ -34,7 +34,7 @@ class UserRoutesSpec extends AnyFlatSpec with Matchers with MockedRoutesIO with 
 
     val user = 
       User(
-        id = ID.create[User]("user-my-id"),
+        id = ID.create[User]("my-id"),
         createdAt = new DateTime(2021, 8, 4, 10, 10, 0, 0, DateTimeZone.UTC),
         email = Email("me@ruchij.com").value,
         firstName = "Ruchira",

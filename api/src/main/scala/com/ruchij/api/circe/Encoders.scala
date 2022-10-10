@@ -3,7 +3,7 @@ package com.ruchij.api.circe
 import cats.Show
 import com.ruchij.api.dao.models.IDs.ID
 import com.ruchij.api.dao.user.models.Emails.Email
-import com.ruchij.api.services.authentication.models.AuthenticationToken.AuthenticationSecret
+import com.ruchij.api.services.authentication.models.AuthenticationToken.Secret
 import io.circe.Encoder
 import org.http4s.headers.`Content-Type`
 import org.http4s.{Header, Method, Uri}
@@ -17,7 +17,7 @@ object Encoders {
 
   given Encoder[Email] = Encoder.encodeString.contramap(_.toString)
 
-  given Encoder[AuthenticationSecret] = Encoder.encodeString.contramap(_.toString)
+  given Encoder[Secret] = Encoder.encodeString.contramap(_.toString)
 
   given Encoder[Method] = Encoder.encodeString.contramap(_.name)
 

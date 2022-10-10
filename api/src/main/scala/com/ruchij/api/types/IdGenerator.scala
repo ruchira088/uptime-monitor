@@ -30,7 +30,7 @@ object IdGenerator {
 
     given [F[_]: Sync]: IdGenerator[F] with {
         override def generate[A: IdPrefix]: F[ID[A]] = 
-            Sync[F].delay(UUID.randomUUID().toString())
-                .map { uuid => ID.create[A](s"${IdPrefix[A].value}$uuid") }
+            RandomGenerator[F, UUID].generate
+                .map(uuid => ID.create[A](uuid.toString()))
     }
 }

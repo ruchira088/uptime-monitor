@@ -1,14 +1,18 @@
 package com.ruchij.api.services.authentication.models
 
 import cats.Semigroup
+import cats.effect.kernel.Sync
+import cats.implicits.*
 import cats.kernel.instances.StringMonoid
 import com.ruchij.api.dao.models.IDs.ID
-import org.joda.time.DateTime
 import com.ruchij.api.dao.user.models.User
-import com.ruchij.api.services.authentication.models.AuthenticationToken.AuthenticationSecret
+import com.ruchij.api.services.authentication.models.AuthenticationToken.Secret
+import com.ruchij.api.types.RandomGenerator
+import org.joda.time.DateTime
+import java.util.UUID
 
 final case class AuthenticationToken(
-  secret: AuthenticationSecret,
+  secret: Secret,
   createdAt: DateTime,
   updatedAt: DateTime,
   userId: ID[User],
@@ -17,11 +21,16 @@ final case class AuthenticationToken(
 )
 
 object AuthenticationToken {
-  opaque type AuthenticationSecret = String
+  opaque type Secret = String
 
-  given Semigroup[AuthenticationSecret] = new StringMonoid
+  type SecretGenerator[F[_]] = RandomGenerator[F, Secret]
 
-  object AuthenticationSecret {
-    def apply(authenticationSecret: String): AuthenticationSecret = authenticationSecret
+  given Semigroup[Secret] = new StringMonoid
+
+  given [F[_]: Sync]: RandomGenerator[F, Secret] =
+    RandomGenerator[F, UUID].map(uuid => Secret(uuid.toString()))
+
+  object Secret {
+    def apply(authenticationSecret: String): Secret = authenticationSecret
   }
 }

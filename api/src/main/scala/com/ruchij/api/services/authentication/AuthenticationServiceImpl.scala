@@ -16,16 +16,17 @@ import com.ruchij.api.kvstore.{KeyValueStore, Keyspace, KeyspacedKeyValueStore}
 import com.ruchij.api.services.authentication.AuthenticationServiceImpl.given
 import com.ruchij.api.services.authentication.AuthenticationServiceImpl.Session
 import com.ruchij.api.services.authentication.models.AuthenticationToken
-import com.ruchij.api.services.authentication.models.AuthenticationToken.AuthenticationSecret
+import com.ruchij.api.services.authentication.models.AuthenticationToken.{Secret, SecretGenerator}
 import com.ruchij.api.services.hash.PasswordHashingService
 import com.ruchij.api.types.IdGenerator.IdPrefix
 import com.ruchij.api.types.{IdGenerator, JodaClock}
+import com.ruchij.api.types.RandomGenerator
 import io.circe.generic.auto.*
 
 import scala.concurrent.duration.FiniteDuration
 import cats.syntax.validated
 
-class AuthenticationServiceImpl[F[_]: MonadThrow: JodaClock: IdGenerator, G[_]: MonadThrow](
+class AuthenticationServiceImpl[F[_]: MonadThrow: JodaClock: SecretGenerator, G[_]: MonadThrow](
   keyValueStore: KeyValueStore[F],
   passwordHashingService: PasswordHashingService[F],
   userDao: UserDao[G],
@@ -33,8 +34,8 @@ class AuthenticationServiceImpl[F[_]: MonadThrow: JodaClock: IdGenerator, G[_]: 
   authenticationConfiguration: AuthenticationConfiguration
 )(using transaction: G ~> F) extends AuthenticationService[F] {
 
-  private val keyspacedKeyValueStore: KeyspacedKeyValueStore[F, AuthenticationSecret, AuthenticationToken] =
-    KeyspacedKeyValueStore[F, AuthenticationSecret, AuthenticationToken](keyValueStore)
+  private val keyspacedKeyValueStore: KeyspacedKeyValueStore[F, Secret, AuthenticationToken] =
+    KeyspacedKeyValueStore[F, Secret, AuthenticationToken](keyValueStore)
 
   override def login(email: Email, password: Password): F[AuthenticationToken] =
     transaction {
@@ -51,9 +52,9 @@ class AuthenticationServiceImpl[F[_]: MonadThrow: JodaClock: IdGenerator, G[_]: 
       }
       .flatMap { credentials =>
         JodaClock[F].timestamp.flatMap { timestamp =>
-          IdGenerator[F].generate[AuthenticationSecret].map { authenticationSecret =>
+          RandomGenerator[F, Secret].generate.map { authenticationSecret =>
             AuthenticationToken(
-              secret = AuthenticationSecret(authenticationSecret.toString),
+              secret = Secret(authenticationSecret.toString),
               createdAt = timestamp,
               updatedAt = timestamp,
               userId = credentials.userId,
@@ -71,7 +72,7 @@ class AuthenticationServiceImpl[F[_]: MonadThrow: JodaClock: IdGenerator, G[_]: 
         )  
       }
 
-  override def authenticate(authenticationSecret: AuthenticationSecret): F[User] =
+  override def authenticate(authenticationSecret: Secret): F[User] =
     for {
       session <- validate(authenticationSecret)
       timestamp <- JodaClock[F].timestamp
@@ -86,13 +87,13 @@ class AuthenticationServiceImpl[F[_]: MonadThrow: JodaClock: IdGenerator, G[_]: 
       _ <- keyspacedKeyValueStore.put(authenticationSecret, token, Some(authenticationConfiguration.sessionDuration))
     } yield session.user
 
-  override def logout(authenticationSecret: AuthenticationSecret): F[User] =
+  override def logout(authenticationSecret: Secret): F[User] =
     validate(authenticationSecret)
       .flatMap { session =>
         keyspacedKeyValueStore.delete(authenticationSecret).as(session.user)  
       }
   
-  private def validate(authenticationSecret: AuthenticationSecret): F[Session] =
+  private def validate(authenticationSecret: Secret): F[Session] =
     OptionT(keyspacedKeyValueStore.get(authenticationSecret))
       .getOrRaise(AuthenticationException("Authentication token not found"))
       .flatMap { authenticationToken =>
@@ -116,8 +117,8 @@ class AuthenticationServiceImpl[F[_]: MonadThrow: JodaClock: IdGenerator, G[_]: 
 object AuthenticationServiceImpl {
   private final case class Session(user: User, authenticationToken: AuthenticationToken)
 
-  given Keyspace[AuthenticationSecret, AuthenticationToken] =
-    Keyspace[AuthenticationSecret, AuthenticationToken](AuthenticationSecret("authentication-"))
+  given Keyspace[Secret, AuthenticationToken] =
+    Keyspace[Secret, AuthenticationToken](Secret("authentication-"))
 
-  given IdPrefix[AuthenticationSecret] with { override val value: String = "" }
+  given IdPrefix[Secret] with { override val value: String = "" }
 }

@@ -3,7 +3,7 @@ package com.ruchij.api.circe
 import com.ruchij.api.dao.models.IDs.ID
 import com.ruchij.api.dao.user.models.Emails.Email
 import com.ruchij.api.dao.user.models.Passwords.Password
-import com.ruchij.api.services.authentication.models.AuthenticationToken.AuthenticationSecret
+import com.ruchij.api.services.authentication.models.AuthenticationToken.Secret
 import com.ruchij.api.types.IdGenerator.IdPrefix
 import io.circe.Decoder
 import org.http4s.{Header, Method, Uri}
@@ -24,8 +24,8 @@ object Decoders {
   given Decoder[Password] =
     Decoder.decodeString.map(stringValue => Password(stringValue))
 
-  given Decoder[AuthenticationSecret] =
-    Decoder.decodeString.map(stringValue => AuthenticationSecret(stringValue))
+  given Decoder[Secret] =
+    Decoder.decodeString.map(stringValue => Secret(stringValue))
 
   given [A](using IdPrefix[A], ClassTag[A]): Decoder[ID[A]] =
     Decoder.decodeString.emap { stringValue => ID.parse[A](stringValue).left.map(_.message) }
