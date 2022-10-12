@@ -5,7 +5,9 @@ import cats.Monad
 import cats.Applicative.apply
 import cats.Applicative
 import cats.effect.kernel.Sync
+
 import java.util.UUID
+import scala.util.Random
 
 trait RandomGenerator[F[_], +A] {
   def generate[B >: A]: F[B]
@@ -14,6 +16,11 @@ trait RandomGenerator[F[_], +A] {
 object RandomGenerator {
   def apply[F[_], A](using randomGenerator: RandomGenerator[F, A]): RandomGenerator[F, A] =
     randomGenerator
+
+  def range[F[_]: Sync](start: Int, end: Int): RandomGenerator[F, Int] =
+    new RandomGenerator[F, Int] {
+      override def generate[B >: Int]: F[B] = Sync[F].delay(Random.between(start, end))
+    }
 
   given [F[_]: Monad]: Monad[[X] =>> RandomGenerator[F, X]] with {
     def pure[A](x: A): RandomGenerator[F, A] = 

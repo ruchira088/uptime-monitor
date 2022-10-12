@@ -4,6 +4,7 @@ object Dependencies {
   val ScalaVersion = "3.2.0"
   val Http4sVersion = "0.23.16"
   val CirceVersion = "0.14.3"
+  val TestContainersVersion = "1.17.5"
 
   lazy val http4sDsl = "org.http4s" %% "http4s-dsl" % Http4sVersion
 
@@ -34,6 +35,10 @@ object Dependencies {
   lazy val redis4CatsEffects = "dev.profunktor" %% "redis4cats-effects" % "1.2.0"
 
   lazy val jbcrypt = "org.mindrot" % "jbcrypt" % "0.4"
+
+  lazy val testContainers = "org.testcontainers" % "testcontainers" % TestContainersVersion
+
+  lazy val postgresqlTestContainer = "org.testcontainers" % "postgresql" % TestContainersVersion
 
   lazy val embeddedRedis = "com.github.kstyrc" % "embedded-redis" % "0.6"
 

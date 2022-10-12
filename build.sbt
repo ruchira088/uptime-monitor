@@ -55,6 +55,9 @@ lazy val api =
         redis4CatsEffects,
         jbcrypt,
         jodaTime,
+        embeddedRedis,
+        testContainers,
+        postgresqlTestContainer,
         pureconfig,
         logbackClassic,
         scalaLogging
