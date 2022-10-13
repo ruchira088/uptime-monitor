@@ -42,7 +42,7 @@ object Dependencies {
 
   lazy val embeddedRedis = "com.github.kstyrc" % "embedded-redis" % "0.6"
 
-  lazy val jodaTime = "joda-time" % "joda-time" % "2.11.2"
+  lazy val jodaTime = "joda-time" % "joda-time" % "2.12.0"
 
   lazy val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.1"
 
