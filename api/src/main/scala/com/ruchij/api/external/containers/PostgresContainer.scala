@@ -6,7 +6,7 @@ import com.ruchij.migration.config.DatabaseConfiguration
 import com.ruchij.api.external.ContainerizedExternalResourceProvider
 import org.testcontainers.containers.PostgreSQLContainer
 
-class PostgresContainer extends PostgreSQLContainer[PostgresContainer](PostgreSQLContainer.DEFAULT_TAG)
+class PostgresContainer extends PostgreSQLContainer[PostgresContainer]("postgres:14")
 
 object PostgresContainer {
   def create[F[_]: Sync]: Resource[F, DatabaseConfiguration] =

@@ -136,5 +136,17 @@ class HealthCheckServiceImpl[F[_]: Sync: JodaClock: IdGenerator, G[_]: MonadThro
     }
     yield HealthCheck(healthCheckDetails, httpEndpoint, headers, maybeRequestBody)
 
-  override def updateHealthCheckDetails(id: ID[HealthCheckDetails], maybeName: Option[String], maybeDescription: Option[String]): F[HealthCheckDetails] = ???
+  override def updateHealthCheckDetails(
+    id: ID[HealthCheckDetails], 
+    maybeName: Option[String], 
+    maybeDescription: Option[String], 
+    maybeUserId: Option[ID[User]]
+   ): F[HealthCheckDetails] = 
+    transaction { 
+      healthCheckDetailsDao.update(id, maybeName, maybeDescription, maybeUserId)
+        .productR {
+          OptionT(healthCheckDetailsDao.findById(id, maybeUserId))
+            .getOrRaise(ResourceNotFoundException(s"HealthCheckDetails not found id=$id"))
+        }
+    }
 }

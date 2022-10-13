@@ -14,6 +14,7 @@ trait HealthCheckDetailsDao[F[_]] {
   def update(
     id: ID[HealthCheckDetails],
     maybeName: Option[String],
-    maybeDescription: Option[String]
-  ): F[Option[HealthCheckDetails]]
+    maybeDescription: Option[String],
+    maybeUserId: Option[ID[User]]
+  ): F[Int]
 }

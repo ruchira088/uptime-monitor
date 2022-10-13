@@ -14,6 +14,7 @@ import org.http4s.ContextRoutes
 import org.http4s.HttpRoutes
 import org.http4s.circe.CirceEntityCodec.*
 import org.http4s.dsl.Http4sDsl
+import org.http4s.ResponseCookie
 
 object AuthenticationRoutes {
 
@@ -25,9 +26,17 @@ object AuthenticationRoutes {
         for {
           userLoginRequest <- request.as[UserLoginRequest]
           authenticationToken <- authenticationService.login(userLoginRequest.email, userLoginRequest.password)
+          
+          cookie = 
+            ResponseCookie(
+              name = UserAuthenticator.AuthenticationCookieName, 
+              content = authenticationToken.secret.toString(),
+              path = Some("/")
+            )
+          
           response <- Created(authenticationToken)
         }
-        yield response.addCookie(UserAuthenticator.AuthenticationCookieName, authenticationToken.secret.toString)
+        yield response.addCookie(cookie)
 
       case request @ DELETE -> Root / "logout" =>
         for {

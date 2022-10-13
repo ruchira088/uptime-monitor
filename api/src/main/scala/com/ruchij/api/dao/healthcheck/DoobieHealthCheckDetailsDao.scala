@@ -6,7 +6,9 @@ import com.ruchij.api.dao.models.IDs.ID
 import com.ruchij.api.dao.user.models.User
 import doobie.ConnectionIO
 import doobie.implicits.toSqlInterpolator
-import doobie.Fragments.orOpt
+import doobie.Fragments.{setOpt, whereAndOpt}
+import doobie.util.fragment.Fragment
+import cats.Applicative
 
 object DoobieHealthCheckDetailsDao extends HealthCheckDetailsDao[ConnectionIO] {
   private val SelectQuery = sql"SELECT id, name, description, created_at, user_id, http_endpoint_id FROM health_check"
@@ -28,7 +30,7 @@ object DoobieHealthCheckDetailsDao extends HealthCheckDetailsDao[ConnectionIO] {
     id: ID[HealthCheckDetails],
     maybeUserId: Option[ID[User]]
   ): ConnectionIO[Option[HealthCheckDetails]] =
-    (SelectQuery ++ fr"WHERE id = $id" ++ orOpt(maybeUserId.map(userId => fr"user_id = $userId")))
+    (SelectQuery ++ fr"WHERE id = $id" ++ maybeUserId.map(userId => fr"AND user_id = $userId").getOrElse(Fragment.empty))
       .query[HealthCheckDetails]
       .option
 
@@ -38,6 +40,22 @@ object DoobieHealthCheckDetailsDao extends HealthCheckDetailsDao[ConnectionIO] {
   override def update(
     id: ID[HealthCheckDetails],
     maybeName: Option[String],
-    maybeDescription: Option[String]
-  ): ConnectionIO[Option[HealthCheckDetails]] = ???
+    maybeDescription: Option[String],
+    maybeUserId: Option[ID[User]]
+  ): ConnectionIO[Int] = 
+    if List(maybeName, maybeDescription).forall(_.isEmpty) 
+    then Applicative[ConnectionIO].pure(0)
+    else
+      (fr"UPDATE health_check" ++ 
+        setOpt(
+          maybeName.map(name => fr"name = $name"), 
+          maybeDescription.map(
+            description => if description.isEmpty() then fr"description = NULL" else fr"description = $description"
+            )
+        ) ++ 
+        whereAndOpt(Some(fr"id = $id"), maybeUserId.map(userId => fr"user_id = $userId"))
+      )
+          .update
+          .run 
+    
 }

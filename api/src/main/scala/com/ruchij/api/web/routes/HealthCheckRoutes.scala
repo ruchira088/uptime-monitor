@@ -12,6 +12,7 @@ import com.ruchij.api.services.healthcheck.HealthCheckService
 import com.ruchij.api.services.healthcheck.models.HealthCheck
 import com.ruchij.api.web.middleware.UserAuthenticator
 import com.ruchij.api.web.requests.CreateHealthCheckRequest
+import com.ruchij.api.web.requests.UpdateHealthCheckDetailsRequest
 import com.ruchij.api.types.FunctionKTypes.{*, given}
 import com.ruchij.api.web.responses.HealthCheckResponse
 import org.http4s.{ContextRoutes, HttpRoutes}
@@ -54,11 +55,21 @@ object HealthCheckRoutes {
           }
           yield response
 
-        case PATCH -> Root / "details" / id as user =>
+        case authenticatedRequest @ PATCH -> Root / "details" / id as user =>
           for {
-            healthCheckDetails <- ID.parse[HealthCheckDetails](id).toType[F, Throwable]
+            healthCheckDetailsId <- ID.parse[HealthCheckDetails](id).toType[F, Throwable]
+            updatedHealthCheckDetailsRequest <- authenticatedRequest.req.as[UpdateHealthCheckDetailsRequest]
+            healthCheckDetails <- 
+              healthCheckService.updateHealthCheckDetails(
+                healthCheckDetailsId, 
+                updatedHealthCheckDetailsRequest.name, 
+                updatedHealthCheckDetailsRequest.description, 
+                Some(user.id)
+              )
+            
+            response <- Ok(healthCheckDetails)
           }
-          yield ???
+          yield response
       }
     }
   }
