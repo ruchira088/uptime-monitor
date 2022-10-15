@@ -13,8 +13,10 @@ import com.ruchij.api.services.healthcheck.models.HealthCheck
 import com.ruchij.api.web.middleware.UserAuthenticator
 import com.ruchij.api.web.requests.CreateHealthCheckRequest
 import com.ruchij.api.web.requests.UpdateHealthCheckDetailsRequest
+import com.ruchij.api.web.requests.UpdateHeaderRequest
 import com.ruchij.api.types.FunctionKTypes.{*, given}
 import com.ruchij.api.web.responses.HealthCheckResponse
+import com.ruchij.api.dao.http.models.HttpHeader
 import org.http4s.{ContextRoutes, HttpRoutes}
 import io.circe.generic.auto.*
 import org.http4s.dsl.Http4sDsl
@@ -68,6 +70,22 @@ object HealthCheckRoutes {
               )
             
             response <- Ok(healthCheckDetails)
+          }
+          yield response
+
+        case authenticatedRequest @ PATCH -> Root / "headers" / id as user =>
+          for {
+            httpHeaderId <- ID.parse[HttpHeader](id).toType[F, Throwable]
+            updateHeaderRequest <- authenticatedRequest.req.as[UpdateHeaderRequest]
+            httpHeader <- 
+              healthCheckService.updateHeader(
+                httpHeaderId, 
+                updateHeaderRequest.name, 
+                updateHeaderRequest.value,
+                Some(user.id)
+              )
+
+            response <- Ok(httpHeader)
           }
           yield response
       }

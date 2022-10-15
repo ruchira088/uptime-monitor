@@ -9,14 +9,14 @@ import com.ruchij.api.dao.doobie.DoobieCodecs.given
 object DoobieHttpEndpointDao extends HttpEndpointDao[ConnectionIO]  {
   override def insert(httpEndpoint: HttpEndpoint): ConnectionIO[Int] =
     sql"""
-        INSERT INTO http_endpoint (id, created_at, updated_at, http_method, url)
-            VALUES (
-              ${httpEndpoint.id},
-              ${httpEndpoint.createdAt},
-              ${httpEndpoint.updatedAt},
-              ${httpEndpoint.method},
-              ${httpEndpoint.url}
-            )
+      INSERT INTO http_endpoint (id, created_at, updated_at, http_method, url)
+        VALUES (
+          ${httpEndpoint.id},
+          ${httpEndpoint.createdAt},
+          ${httpEndpoint.updatedAt},
+          ${httpEndpoint.method},
+          ${httpEndpoint.url}
+        )
      """
       .update
       .run

@@ -119,7 +119,8 @@ class HealthCheckServiceImpl[F[_]: Sync: JodaClock: IdGenerator, G[_]: MonadThro
 
   override def getByUserId(userId: ID[User]): F[Seq[HealthCheck]] =
     transaction {
-      healthCheckDetailsDao.findByUserId(userId)
+      healthCheckDetailsDao
+        .findByUserId(userId)
         .flatMap {
           _.traverse { healthCheckDetails => getHealthCheck(healthCheckDetails).value }
         }
@@ -128,22 +129,42 @@ class HealthCheckServiceImpl[F[_]: Sync: JodaClock: IdGenerator, G[_]: MonadThro
         }
     }
 
+  override def updateHeader(
+    headerId: ID[HttpHeader],
+    maybeKey: Option[String],
+    maybeValue: Option[String],
+    maybeUserId: Option[ID[User]]
+  ): F[HttpHeader] = 
+    transaction {
+      maybeUserId.traverse { 
+            userId => 
+              OptionT(httpHeaderDao.findUserId(headerId))
+                .filter(_ == userId)
+                .getOrRaise(ResourceNotFoundException(s"Unable to find id=$headerId for userId=$userId"))
+          }
+          .product(httpHeaderDao.update(headerId, maybeKey, maybeValue))
+          .productR {
+            OptionT(httpHeaderDao.findById(headerId))
+              .getOrRaise(ResourceNotFoundException(s"Unable to find HTTP header id=$headerId"))
+          }
+    }
+
   private def getHealthCheck(healthCheckDetails: HealthCheckDetails): OptionT[G, HealthCheck] =
     for {
       httpEndpoint <- OptionT(httpEndpointDao.findById(healthCheckDetails.httpEndpointId))
       headers <- OptionT.liftF(httpHeaderDao.findByHttpEndpointId(httpEndpoint.id))
       maybeRequestBody <- OptionT.liftF(httpRequestBodyDao.findByHttpEndpointId(httpEndpoint.id))
-    }
-    yield HealthCheck(healthCheckDetails, httpEndpoint, headers, maybeRequestBody)
+    } yield HealthCheck(healthCheckDetails, httpEndpoint, headers, maybeRequestBody)
 
   override def updateHealthCheckDetails(
-    id: ID[HealthCheckDetails], 
-    maybeName: Option[String], 
-    maybeDescription: Option[String], 
+    id: ID[HealthCheckDetails],
+    maybeName: Option[String],
+    maybeDescription: Option[String],
     maybeUserId: Option[ID[User]]
-   ): F[HealthCheckDetails] = 
-    transaction { 
-      healthCheckDetailsDao.update(id, maybeName, maybeDescription, maybeUserId)
+  ): F[HealthCheckDetails] =
+    transaction {
+      healthCheckDetailsDao
+        .update(id, maybeName, maybeDescription, maybeUserId)
         .productR {
           OptionT(healthCheckDetailsDao.findById(id, maybeUserId))
             .getOrRaise(ResourceNotFoundException(s"HealthCheckDetails not found id=$id"))

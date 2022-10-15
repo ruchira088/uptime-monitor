@@ -15,15 +15,15 @@ object DoobieHealthCheckDetailsDao extends HealthCheckDetailsDao[ConnectionIO] {
 
   override def insert(healthCheckDetails: HealthCheckDetails): ConnectionIO[Int] =
     sql"""
-        INSERT INTO health_check (id, name, description, created_at, user_id, http_endpoint_id)
-          VALUES (
-            ${healthCheckDetails.id},
-            ${healthCheckDetails.createdAt},
-            ${healthCheckDetails.name},
-            ${healthCheckDetails.description},
-            ${healthCheckDetails.userId},
-            ${healthCheckDetails.httpEndpointId}
-          )
+      INSERT INTO health_check (id, name, description, created_at, user_id, http_endpoint_id)
+        VALUES (
+          ${healthCheckDetails.id},
+          ${healthCheckDetails.createdAt},
+          ${healthCheckDetails.name},
+          ${healthCheckDetails.description},
+          ${healthCheckDetails.userId},
+          ${healthCheckDetails.httpEndpointId}
+        )
     """.update.run
 
   override def findById(

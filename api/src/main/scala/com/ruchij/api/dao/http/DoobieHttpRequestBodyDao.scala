@@ -11,14 +11,14 @@ object DoobieHttpRequestBodyDao extends HttpRequestBodyDao[ConnectionIO] {
 
   override def insert(httpRequestBody: HttpRequestBody): ConnectionIO[Int] =
     sql"""
-        INSERT INTO http_request_body (id, created_at, http_endpoint_id, content_type, body)
-          VALUES (
-            ${httpRequestBody.id},
-            ${httpRequestBody.createdAt},
-            ${httpRequestBody.httpEndpointId},
-            ${httpRequestBody.contentType},
-            ${httpRequestBody.body}
-          )
+      INSERT INTO http_request_body (id, created_at, http_endpoint_id, content_type, body)
+        VALUES (
+          ${httpRequestBody.id},
+          ${httpRequestBody.createdAt},
+          ${httpRequestBody.httpEndpointId},
+          ${httpRequestBody.contentType},
+          ${httpRequestBody.body}
+        )
     """
       .update
       .run

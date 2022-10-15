@@ -11,8 +11,8 @@ object DoobieCredentialsDao extends CredentialsDao[ConnectionIO] {
 
   override def insert(credentials: Credentials): ConnectionIO[Int] =
     sql"""
-        INSERT INTO user_credentials (user_id, created_at, hashed_password)
-            VALUES(${credentials.userId}, ${credentials.createdAt}, ${credentials.hashedPassword})
+      INSERT INTO user_credentials (user_id, created_at, hashed_password)
+        VALUES(${credentials.userId}, ${credentials.createdAt}, ${credentials.hashedPassword})
     """
       .update
       .run

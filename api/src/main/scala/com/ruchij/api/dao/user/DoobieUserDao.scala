@@ -10,18 +10,18 @@ import com.ruchij.api.dao.models.IDs.ID
 object DoobieUserDao extends UserDao[ConnectionIO] {
 
   private val SelectQuery =
-      fr"SELECT id, created_at, email, first_name, last_name FROM api_user"
+    fr"SELECT id, created_at, email, first_name, last_name FROM api_user"
 
   override def insert(user: User): ConnectionIO[Int] =
     sql"""
-        INSERT INTO api_user (id, created_at, email, first_name, last_name)
-            VALUES (
-                ${user.id},
-                ${user.createdAt},
-                ${user.email},
-                ${user.firstName},
-                ${user.lastName}
-            )
+      INSERT INTO api_user (id, created_at, email, first_name, last_name)
+          VALUES (
+              ${user.id},
+              ${user.createdAt},
+              ${user.email},
+              ${user.firstName},
+              ${user.lastName}
+          )
     """
         .update
         .run
