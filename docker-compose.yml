@@ -58,6 +58,7 @@ services:
   
   postgres:
     image: postgres
+    command: ["postgres", "-c", "log_statement=all"]
     healthcheck:
       test: "pg_isready -U admin -d uptime-monitor"
       start_period: 5s

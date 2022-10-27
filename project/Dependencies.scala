@@ -28,7 +28,7 @@ object Dependencies {
 
   lazy val h2 = "com.h2database" % "h2" % "2.1.214"
 
-  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.4.0"
+  lazy val flywayCore = "org.flywaydb" % "flyway-core" % "9.6.0"
 
   lazy val catsEffect = "org.typelevel" %% "cats-effect" % "3.3.14"
 
